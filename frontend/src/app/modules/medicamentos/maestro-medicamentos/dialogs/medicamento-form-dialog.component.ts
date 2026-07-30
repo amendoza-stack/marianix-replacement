@@ -17,28 +17,45 @@ import { MedicamentosValidators } from '../validators/medicamentos.validators';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatIconModule],
   template: `
-    <h2 mat-dialog-title style="font-weight:800"><mat-icon color="primary">medication</mat-icon> {{ data ? 'Editar Droga' : 'Nueva Droga' }}</h2>
-    <mat-dialog-content>
-      <form [formGroup]="form" style="display:flex; flex-direction:column; gap:12px; padding-top:8px; width:400px">
-        <mat-form-field appearance="outline">
-          <mat-label>Descripción *</mat-label>
-          <input matInput formControlName="descripcion" placeholder="ÁCIDO ACETILSALICÍLICO">
-          <mat-error *ngIf="form.get('descripcion')?.hasError('required')">Obligatorio</mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Estado *</mat-label>
-          <mat-select formControlName="activo">
-            <mat-option [value]="true">Activo</mat-option>
-            <mat-option [value]="false">Inactivo</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cancelar</button>
-      <button mat-flat-button color="primary" [disabled]="form.invalid" (click)="onSave()">Guardar</button>
-    </mat-dialog-actions>
-  `
+    <div class="dialog-box notranslate" translate="no">
+      <h2 mat-dialog-title class="dialog-title">
+        <mat-icon color="primary">medication</mat-icon>
+        {{ data ? 'Editar Droga' : 'Nueva Droga' }}
+      </h2>
+
+      <mat-dialog-content class="dialog-content">
+        <form [formGroup]="form" class="form-vertical">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Descripción *</mat-label>
+            <input matInput formControlName="descripcion" placeholder="Ej: ÁCIDO ACETILSALICÍLICO">
+            <mat-error *ngIf="form.get('descripcion')?.hasError('required')">Campo obligatorio</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Estado *</mat-label>
+            <mat-select formControlName="activo">
+              <mat-option [value]="true">Activo</mat-option>
+              <mat-option [value]="false">Inactivo</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </form>
+      </mat-dialog-content>
+
+      <mat-dialog-actions align="end" class="dialog-actions">
+        <button mat-button mat-dialog-close>Cancelar</button>
+        <button mat-flat-button color="primary" class="btn-save" [disabled]="form.invalid" (click)="onSave()">Guardar</button>
+      </mat-dialog-actions>
+    </div>
+  `,
+  styles: [`
+    .dialog-box { width: 100%; box-sizing: border-box; }
+    .dialog-title { display: flex; align-items: center; gap: 8px; font-weight: 800; color: var(--text-main); margin: 0 0 8px 0; }
+    .dialog-content { padding: 8px 16px 16px 16px !important; overflow-x: hidden; }
+    .form-vertical { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+    .full-width { width: 100%; }
+    .dialog-actions { padding: 12px 16px !important; border-top: 1px solid var(--border-color); }
+    .btn-save { font-weight: 700; height: 40px; padding: 0 20px; background-color: var(--brand-primary) !important; }
+  `]
 })
 export class DrogaFormDialogComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -62,33 +79,51 @@ export class DrogaFormDialogComponent implements OnInit {
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatIconModule],
   template: `
-    <h2 mat-dialog-title style="font-weight:800"><mat-icon color="primary">science</mat-icon> {{ data ? 'Editar Monodroga' : 'Nueva Monodroga' }}</h2>
-    <mat-dialog-content>
-      <form [formGroup]="form" style="display:flex; flex-direction:column; gap:12px; padding-top:8px; width:420px">
-        <mat-form-field appearance="outline">
-          <mat-label>Código SSS *</mat-label>
-          <input matInput formControlName="codigoSSS" placeholder="SSS-4920">
-          <mat-error *ngIf="form.get('codigoSSS')?.hasError('required')">Obligatorio</mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Descripción *</mat-label>
-          <input matInput formControlName="descripcion" placeholder="ÁCIDO ACETILSALICÍLICO 500 MG">
-          <mat-error *ngIf="form.get('descripcion')?.hasError('required')">Obligatorio</mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Estado *</mat-label>
-          <mat-select formControlName="activo">
-            <mat-option [value]="true">Activo</mat-option>
-            <mat-option [value]="false">Inactivo</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cancelar</button>
-      <button mat-flat-button color="primary" [disabled]="form.invalid" (click)="onSave()">Guardar</button>
-    </mat-dialog-actions>
-  `
+    <div class="dialog-box notranslate" translate="no">
+      <h2 mat-dialog-title class="dialog-title">
+        <mat-icon color="primary">science</mat-icon>
+        {{ data ? 'Editar Monodroga' : 'Nueva Monodroga' }}
+      </h2>
+
+      <mat-dialog-content class="dialog-content">
+        <form [formGroup]="form" class="form-vertical">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Código SSS *</mat-label>
+            <input matInput formControlName="codigoSSS" placeholder="Ej: SSS-4920">
+            <mat-error *ngIf="form.get('codigoSSS')?.hasError('required')">Campo obligatorio</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Descripción *</mat-label>
+            <input matInput formControlName="descripcion" placeholder="Ej: ÁCIDO ACETILSALICÍLICO 500 MG">
+            <mat-error *ngIf="form.get('descripcion')?.hasError('required')">Campo obligatorio</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Estado *</mat-label>
+            <mat-select formControlName="activo">
+              <mat-option [value]="true">Activo</mat-option>
+              <mat-option [value]="false">Inactivo</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </form>
+      </mat-dialog-content>
+
+      <mat-dialog-actions align="end" class="dialog-actions">
+        <button mat-button mat-dialog-close>Cancelar</button>
+        <button mat-flat-button color="primary" class="btn-save" [disabled]="form.invalid" (click)="onSave()">Guardar</button>
+      </mat-dialog-actions>
+    </div>
+  `,
+  styles: [`
+    .dialog-box { width: 100%; box-sizing: border-box; }
+    .dialog-title { display: flex; align-items: center; gap: 8px; font-weight: 800; color: var(--text-main); margin: 0 0 8px 0; }
+    .dialog-content { padding: 8px 16px 16px 16px !important; overflow-x: hidden; }
+    .form-vertical { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+    .full-width { width: 100%; }
+    .dialog-actions { padding: 12px 16px !important; border-top: 1px solid var(--border-color); }
+    .btn-save { font-weight: 700; height: 40px; padding: 0 20px; background-color: var(--brand-primary) !important; }
+  `]
 })
 export class MonodrogaFormDialogComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -113,67 +148,85 @@ export class MonodrogaFormDialogComponent implements OnInit {
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatDatepickerModule, MatNativeDateModule, MatButtonModule, MatIconModule],
   template: `
-    <h2 mat-dialog-title style="font-weight:800"><mat-icon color="primary">local_pharmacy</mat-icon> {{ data ? 'Editar Medicamento' : 'Nuevo Medicamento' }}</h2>
-    <mat-dialog-content style="max-height: 75vh">
-      <form [formGroup]="form" style="display:flex; flex-wrap:wrap; gap:12px; padding-top:8px; width:650px">
-        <mat-form-field appearance="outline" style="width:100%">
-          <mat-label>Descripción Comercial *</mat-label>
-          <input matInput formControlName="descripcion" placeholder="ASPIRINNET 500 MG x 30 COMP.">
-        </mat-form-field>
+    <div class="dialog-box notranslate" translate="no">
+      <h2 mat-dialog-title class="dialog-title">
+        <mat-icon color="primary">local_pharmacy</mat-icon>
+        {{ data ? 'Editar Medicamento' : 'Nuevo Medicamento' }}
+      </h2>
 
-        <mat-form-field appearance="outline" style="width:calc(50% - 6px)">
-          <mat-label>Laboratorio *</mat-label>
-          <mat-select formControlName="laboratorioId">
-            <mat-option [value]="1">LABORATORIOS BAGO S.A.</mat-option>
-            <mat-option [value]="2">ROEMMERS S.A.I.C.F.</mat-option>
-          </mat-select>
-        </mat-form-field>
+      <mat-dialog-content class="dialog-content">
+        <form [formGroup]="form" class="form-grid">
+          <mat-form-field appearance="outline" class="col-full">
+            <mat-label>Descripción Comercial *</mat-label>
+            <input matInput formControlName="descripcion" placeholder="ASPIRINNET 500 MG x 30 COMP.">
+          </mat-form-field>
 
-        <mat-form-field appearance="outline" style="width:calc(50% - 6px)">
-          <mat-label>Monodroga *</mat-label>
-          <mat-select formControlName="monodrogaId">
-            <mat-option [value]="1">ÁCIDO ACETILSALICÍLICO 500 MG</mat-option>
-            <mat-option [value]="2">IBUPROFENO 400 MG</mat-option>
-            <mat-option [value]="3">LOSARTÁN POTÁSICO 50 MG</mat-option>
-          </mat-select>
-        </mat-form-field>
+          <mat-form-field appearance="outline" class="col-half">
+            <mat-label>Laboratorio *</mat-label>
+            <mat-select formControlName="laboratorioId">
+              <mat-option [value]="1">LABORATORIOS BAGO S.A.</mat-option>
+              <mat-option [value]="2">ROEMMERS S.A.I.C.F.</mat-option>
+            </mat-select>
+          </mat-form-field>
 
-        <mat-form-field appearance="outline" style="width:calc(33% - 6px)">
-          <mat-label>Tamaño</mat-label>
-          <input matInput formControlName="tamano" placeholder="30 COMPRIMIDOS">
-        </mat-form-field>
+          <mat-form-field appearance="outline" class="col-half">
+            <mat-label>Monodroga *</mat-label>
+            <mat-select formControlName="monodrogaId">
+              <mat-option [value]="1">ÁCIDO ACETILSALICÍLICO 500 MG</mat-option>
+              <mat-option [value]="2">IBUPROFENO 400 MG</mat-option>
+              <mat-option [value]="3">LOSARTÁN POTÁSICO 50 MG</mat-option>
+            </mat-select>
+          </mat-form-field>
 
-        <mat-form-field appearance="outline" style="width:calc(33% - 6px)">
-          <mat-label>Código de Barras</mat-label>
-          <input matInput formControlName="codigoBarras" placeholder="7791234567890">
-        </mat-form-field>
+          <mat-form-field appearance="outline" class="col-third">
+            <mat-label>Tamaño</mat-label>
+            <input matInput formControlName="tamano" placeholder="30 COMPRIMIDOS">
+          </mat-form-field>
 
-        <mat-form-field appearance="outline" style="width:calc(33% - 6px)">
-          <mat-label>Vigencia Fecha *</mat-label>
-          <input matInput [matDatepicker]="picker" formControlName="vigenciaFecha">
-          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
-        </mat-form-field>
+          <mat-form-field appearance="outline" class="col-third">
+            <mat-label>Código de Barras</mat-label>
+            <input matInput formControlName="codigoBarras" placeholder="7791234567890">
+          </mat-form-field>
 
-        <mat-form-field appearance="outline" style="width:calc(50% - 6px)">
-          <mat-label>Forma Farmacéutica</mat-label>
-          <input matInput formControlName="formaFarmaceutica" placeholder="COMPRIMIDO">
-        </mat-form-field>
+          <mat-form-field appearance="outline" class="col-third">
+            <mat-label>Vigencia Fecha *</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="vigenciaFecha">
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
 
-        <mat-form-field appearance="outline" style="width:calc(50% - 6px)">
-          <mat-label>Multidroga</mat-label>
-          <mat-select formControlName="multidroga">
-            <mat-option value="No">No</mat-option>
-            <mat-option value="Sí">Sí</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cancelar</button>
-      <button mat-flat-button color="primary" [disabled]="form.invalid" (click)="onSave()">Guardar</button>
-    </mat-dialog-actions>
-  `
+          <mat-form-field appearance="outline" class="col-half">
+            <mat-label>Forma Farmacéutica</mat-label>
+            <input matInput formControlName="formaFarmaceutica" placeholder="COMPRIMIDO">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="col-half">
+            <mat-label>Multidroga</mat-label>
+            <mat-select formControlName="multidroga">
+              <mat-option value="No">No</mat-option>
+              <mat-option value="Sí">Sí</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </form>
+      </mat-dialog-content>
+
+      <mat-dialog-actions align="end" class="dialog-actions">
+        <button mat-button mat-dialog-close>Cancelar</button>
+        <button mat-flat-button color="primary" class="btn-save" [disabled]="form.invalid" (click)="onSave()">Guardar</button>
+      </mat-dialog-actions>
+    </div>
+  `,
+  styles: [`
+    .dialog-box { width: 100%; box-sizing: border-box; }
+    .dialog-title { display: flex; align-items: center; gap: 8px; font-weight: 800; color: var(--text-main); margin: 0 0 8px 0; }
+    .dialog-content { padding: 8px 16px 16px 16px !important; max-height: 75vh; overflow-x: hidden; }
+    .form-grid { display: flex; flex-wrap: wrap; gap: 10px; width: 100%; }
+    .col-full { width: 100%; }
+    .col-half { width: calc(50% - 5px); }
+    .col-third { width: calc(33.33% - 7px); }
+    .dialog-actions { padding: 12px 16px !important; border-top: 1px solid var(--border-color); }
+    .btn-save { font-weight: 700; height: 40px; padding: 0 20px; background-color: var(--brand-primary) !important; }
+  `]
 })
 export class MedicamentoFormDialogComponent implements OnInit {
   private fb = inject(FormBuilder);
