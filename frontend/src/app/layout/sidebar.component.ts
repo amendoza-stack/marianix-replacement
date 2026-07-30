@@ -77,6 +77,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 
           <div class="submenu-list">
             <a routerLink="/gestion-salud/obras-sociales" routerLinkActive="active" class="submenu-item"><mat-icon>local_hospital</mat-icon> Obras Sociales</a>
+            <a routerLink="/gestion-salud/farmacias" routerLinkActive="active" class="submenu-item"><mat-icon>local_pharmacy</mat-icon> Farmacias</a>
             <a routerLink="/gestion-salud/laboratorios" routerLinkActive="active" class="submenu-item"><mat-icon>science</mat-icon> Laboratorios</a>
           </div>
         </mat-expansion-panel>

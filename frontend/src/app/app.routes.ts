@@ -37,6 +37,7 @@ export const routes: Routes = [
 
       // GESTIÓN DE SALUD
       { path: 'gestion-salud/obras-sociales', loadComponent: () => import('./modules/gestion-salud/obras-sociales/pages/obras-sociales-page.component').then(m => m.ObrasSocialesPageComponent) },
+      { path: 'gestion-salud/farmacias', loadComponent: () => import('./modules/gestion-salud/farmacias/pages/farmacias-page.component').then(m => m.FarmaciasPageComponent) },
       { path: 'gestion-salud/laboratorios', loadComponent: () => import('./modules/gestion-salud/laboratorios/pages/laboratorios-page.component').then(m => m.LaboratoriosPageComponent) },
 
       // MEDICAMENTOS
