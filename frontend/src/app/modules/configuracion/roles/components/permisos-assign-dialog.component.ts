@@ -6,7 +6,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ModuloPermiso, RolItem } from './roles.model';
+import { ModuloPermiso, RolItem, LISTA_MODULOS_DEFAULT } from './roles.model';
 
 @Component({
   selector: 'app-permisos-assign-dialog',
@@ -40,6 +40,7 @@ import { ModuloPermiso, RolItem } from './roles.model';
             <tbody>
               <tr *ngFor="let m of permisos">
                 <td>
+                  <span class="cat-tag" [ngClass]="m.categoria">{{ m.categoria }}</span>
                   <strong class="modulo-name">{{ m.moduloNombre }}</strong>
                 </td>
                 <td class="text-center">
@@ -55,8 +56,8 @@ import { ModuloPermiso, RolItem } from './roles.model';
                   <mat-slide-toggle [(ngModel)]="m.auditoria" color="primary"></mat-slide-toggle>
                 </td>
                 <td class="text-center">
-                  <button mat-button color="primary" class="btn-sm" (click)="toggleAllModule(m, true)">Todos</button>
-                  <button mat-button color="warn" class="btn-sm" (click)="toggleAllModule(m, false)">Ninguno</button>
+                  <button mat-button color="primary" class="btn-sm" type="button" (click)="toggleAllModule(m, true)">Todos</button>
+                  <button mat-button color="warn" class="btn-sm" type="button" (click)="toggleAllModule(m, false)">Ninguno</button>
                 </td>
               </tr>
             </tbody>
@@ -77,13 +78,19 @@ import { ModuloPermiso, RolItem } from './roles.model';
     .title-icon { color: var(--brand-accent); }
     .dialog-sub { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px; }
     .modal-content { max-height: 75vh; padding-top: 8px; }
-    .permisos-table-wrapper { border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; }
-    .permisos-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-    .permisos-table th { background: var(--bg-card); padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color); color: var(--text-main); font-weight: 700; }
-    .permisos-table td { padding: 10px 12px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+    .permisos-table-wrapper { border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; max-height: 400px; overflow-y: auto; }
+    .permisos-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .permisos-table th { background: var(--bg-card); padding: 10px 12px; text-align: left; border-bottom: 2px solid var(--border-color); color: var(--text-main); font-weight: 700; position: sticky; top: 0; z-index: 2; }
+    .permisos-table td { padding: 8px 12px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
     .text-center { text-align: center; }
-    .modulo-name { color: var(--brand-primary); font-size: 0.9rem; }
-    .btn-sm { font-size: 0.75rem; min-width: 60px; padding: 0 6px; line-height: 28px; }
+    
+    .cat-tag { font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-right: 6px; }
+    .CONFIGURACION { background: #FEF3C7; color: #92400E; }
+    .GESTION_MEDICA { background: #E0F2FE; color: #075985; }
+    .GENERAL { background: #F3E8FF; color: #6B21A8; }
+
+    .modulo-name { color: var(--text-main); font-size: 0.88rem; }
+    .btn-sm { font-size: 0.72rem; min-width: 54px; padding: 0 4px; line-height: 24px; }
   `]
 })
 export class PermisosAssignDialogComponent implements OnInit {
@@ -97,14 +104,7 @@ export class PermisosAssignDialogComponent implements OnInit {
     if (this.rolData && this.rolData.permisos && this.rolData.permisos.length > 0) {
       this.permisos = JSON.parse(JSON.stringify(this.rolData.permisos));
     } else {
-      this.permisos = [
-        { moduloId: 'dash', moduloNombre: 'Dashboard / Estadísticas', lectura: true, escritura: true, eliminacion: false, auditoria: true },
-        { moduloId: 'usr', moduloNombre: 'Gestión de Usuarios', lectura: true, escritura: true, eliminacion: true, auditoria: true },
-        { moduloId: 'rol', moduloNombre: 'Roles y Permisos', lectura: true, escritura: true, eliminacion: true, auditoria: true },
-        { moduloId: 'os', moduloNombre: 'Obras Sociales y Convenios', lectura: true, escritura: true, eliminacion: false, auditoria: true },
-        { moduloId: 'afi', moduloNombre: 'Padrón de Afiliados', lectura: true, escritura: true, eliminacion: false, auditoria: true },
-        { moduloId: 'rec', moduloNombre: 'Auditoría de Recetas', lectura: true, escritura: true, eliminacion: true, auditoria: true }
-      ];
+      this.permisos = JSON.parse(JSON.stringify(LISTA_MODULOS_DEFAULT));
     }
   }
 
