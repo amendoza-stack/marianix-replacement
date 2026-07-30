@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { AfiliadoInterface, AfiliadoMapper } from '../models/afiliado.model';
@@ -16,19 +16,15 @@ export class AfiliadosService {
   }
 
   save(item: AfiliadoInterface): Observable<AfiliadoInterface> {
-    // REGLA DE NEGOCIO: DNI ÚNICO
     const dupDni = this.list.find(x => x.dni === item.dni && x.id !== item.id);
     if (dupDni) return throwError(() => new Error(`Ya existe un afiliado registrado con el DNI ${item.dni}`));
 
-    // REGLA DE NEGOCIO: CUIL ÚNICO
     const dupCuil = this.list.find(x => x.cuil === item.cuil && x.id !== item.id);
     if (dupCuil) return throwError(() => new Error(`Ya existe un afiliado registrado con el CUIL ${item.cuil}`));
 
-    // REGLA DE NEGOCIO: Nº AFILIADO ÚNICO DENTRO DE LA MISMA OBRA SOCIAL
     const dupAfiliadoOS = this.list.find(x => x.obraSocialId === item.obraSocialId && x.numeroAfiliado === item.numeroAfiliado && x.id !== item.id);
     if (dupAfiliadoOS) return throwError(() => new Error(`El N° de Afiliado ${item.numeroAfiliado} ya existe para esta Obra Social.`));
 
-    // NORMALIZACIÓN
     item.apellido = AfiliadoMapper.normalizeText(item.apellido);
     item.nombre = AfiliadoMapper.normalizeText(item.nombre);
     item.edad = AfiliadoMapper.calcularEdad(item.fechaNacimiento);
@@ -72,7 +68,7 @@ export class AfiliadosFacade {
   loadAll(): void {
     this.isLoading.set(true);
     this.service.getAll().subscribe({
-      next: (data) => {
+      next: (data: AfiliadoInterface[]) => {
         this.afiliados.set(data);
         this.isLoading.set(false);
       },

@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { MedicoInterface, MedicoMapper } from '../models/medico.model';
@@ -16,7 +16,6 @@ export class MedicosService {
   }
 
   save(item: MedicoInterface): Observable<MedicoInterface> {
-    // REGLA DE NEGOCIO: MATRÍCULA ÚNICA
     const dupMat = this.list.find(x => x.matricula === item.matricula && x.id !== item.id);
     if (dupMat) return throwError(() => new Error(`Ya existe un médico registrado con la Matrícula ${item.matricula}`));
 
@@ -62,7 +61,7 @@ export class MedicosFacade {
   loadAll(): void {
     this.isLoading.set(true);
     this.service.getAll().subscribe({
-      next: (data) => {
+      next: (data: MedicoInterface[]) => {
         this.medicos.set(data);
         this.isLoading.set(false);
       },
