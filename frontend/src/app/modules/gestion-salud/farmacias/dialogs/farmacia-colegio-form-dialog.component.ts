@@ -12,6 +12,7 @@ import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { FarmaciaColegioService } from '../services/farmacia-colegio.service';
 import { FarmaciasService } from '../services/farmacias.service';
+import { FarmaciaColegioInterface } from '../models/farmacia.model';
 
 @Component({
   selector: 'app-farmacia-colegio-form-dialog',
@@ -101,7 +102,7 @@ export class FarmaciaColegioFormDialogComponent implements OnInit {
   filteredColegios!: Observable<any[]>;
 
   form = this.fb.group({
-    id: [null],
+    id: [null as number | null],
     farmaciaId: [null as number | null, Validators.required],
     farmaciaInput: [null as any, Validators.required],
     colegioFarmaceuticoId: [null as number | null, Validators.required],
@@ -171,8 +172,8 @@ export class FarmaciaColegioFormDialogComponent implements OnInit {
       const farmObj = typeof formVal.farmaciaInput === 'object' ? formVal.farmaciaInput : this.farmaciasList.find(x => x.id === formVal.farmaciaId);
       const colObj = typeof formVal.colegioInput === 'object' ? formVal.colegioInput : this.colegiosList.find(x => x.id === formVal.colegioFarmaceuticoId);
 
-      const payload = {
-        id: formVal.id,
+      const payload: FarmaciaColegioInterface = {
+        ...(formVal.id ? { id: formVal.id } : {}),
         farmaciaId: formVal.farmaciaId!,
         farmaciaCodigo: farmObj?.codigo,
         farmaciaNombre: farmObj?.nombre,
