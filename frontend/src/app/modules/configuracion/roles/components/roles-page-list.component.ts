@@ -145,7 +145,7 @@ export class RolesPageListComponent implements OnInit {
 
   openForm(item?: RolItem): void {
     const dialogRef = this.dialog.open(RolesPageFormComponent, {
-      width: '440px',
+      width: '1000px', maxWidth: '95vw',
       data: { item, totalItems: this.allItems.length }
     });
 
