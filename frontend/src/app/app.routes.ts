@@ -15,8 +15,21 @@ export const routes: Routes = [
       { path: 'dashboard', loadComponent: () => import('./modules/dashboard/dashboard.component').then(m => m.DashboardComponent) },
       { path: 'configuracion/usuarios', loadComponent: () => import('./modules/configuracion/usuarios/components/usuarios-page-list.component').then(m => m.UsuariosPageListComponent) },
       { path: 'configuracion/roles', loadComponent: () => import('./modules/configuracion/roles/components/roles-page-list.component').then(m => m.RolesPageListComponent) },
-      // Redirección directa: Permisos pertenece conceptual y técnicamente a Roles
-      { path: 'configuracion/permisos', redirectTo: 'configuracion/roles', pathMatch: 'full' }
+      { path: 'configuracion/permisos', redirectTo: 'configuracion/roles', pathMatch: 'full' },
+
+      // RUTAS DE LAS 12 TABLAS AUXILIARES
+      { path: 'configuracion/paises', loadComponent: () => import('./modules/configuracion/tablas-auxiliares/pages/paises-page.component').then(m => m.PaisesPageComponent) },
+      { path: 'configuracion/provincias', loadComponent: () => import('./modules/configuracion/tablas-auxiliares/pages/provincias-page.component').then(m => m.ProvinciasPageComponent) },
+      { path: 'configuracion/ubicaciones', loadComponent: () => import('./modules/configuracion/tablas-auxiliares/pages/ubicaciones-page.component').then(m => m.UbicacionesPageComponent) },
+      { path: 'configuracion/zonas', loadComponent: () => import('./modules/configuracion/tablas-auxiliares/pages/zonas-page.component').then(m => m.ZonasPageComponent) },
+      { path: 'configuracion/colegios', loadComponent: () => import('./modules/configuracion/tablas-auxiliares/pages/colegios-page.component').then(m => m.ColegiosPageComponent) },
+      { path: 'configuracion/categorias', loadComponent: () => import('./modules/configuracion/tablas-auxiliares/pages/categorias-page.component').then(m => m.CategoriasPageComponent) },
+      { path: 'configuracion/patologias', loadComponent: () => import('./modules/configuracion/tablas-auxiliares/pages/patologias-page.component').then(m => m.PatologiasPageComponent) },
+      { path: 'configuracion/especialidades', loadComponent: () => import('./modules/configuracion/tablas-auxiliares/pages/especialidades-page.component').then(m => m.EspecialidadesPageComponent) },
+      { path: 'configuracion/observaciones', loadComponent: () => import('./modules/configuracion/tablas-auxiliares/pages/observaciones-page.component').then(m => m.ObservacionesPageComponent) },
+      { path: 'configuracion/vinculos', loadComponent: () => import('./modules/configuracion/tablas-auxiliares/pages/vinculos-page.component').then(m => m.VinculosPageComponent) },
+      { path: 'configuracion/periodos', loadComponent: () => import('./modules/configuracion/tablas-auxiliares/pages/periodos-page.component').then(m => m.PeriodosPageComponent) },
+      { path: 'configuracion/droguerias', loadComponent: () => import('./modules/configuracion/tablas-auxiliares/pages/droguerias-page.component').then(m => m.DrogueriasPageComponent) }
     ]
   },
 
