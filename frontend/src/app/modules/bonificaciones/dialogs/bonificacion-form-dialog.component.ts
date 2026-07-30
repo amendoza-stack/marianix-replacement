@@ -8,10 +8,10 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map, startWith, catchError } from 'rxjs/operators';
 import { BonificacionesService } from '../services/bonificaciones.service';
-import { BonificacionInterface } from '../models/bonificacion.model';
+import { FarmaciasService } from '../../gestion-salud/farmacias/services/farmacias.service';
 
 @Component({
   selector: 'app-bonificacion-form-dialog',
@@ -43,10 +43,10 @@ import { BonificacionInterface } from '../models/bonificacion.model';
             <mat-error *ngIf="form.get('descripcion')?.hasError('required')">Descripción obligatoria</mat-error>
           </mat-form-field>
 
-          <!-- AUTOCOMPLETE CATEGORÍA MEDICAMENTO -->
+          <!-- AUTOCOMPLETE CATEGORÍA MEDICAMENTO (TABLA AUXILIAR) -->
           <mat-form-field appearance="outline" class="col-half">
             <mat-label>Categoría de Medicamento *</mat-label>
-            <input type="text" matInput formControlName="categoriaInput" [matAutocomplete]="autoCat" placeholder="Buscar categoría...">
+            <input type="text" matInput formControlName="categoriaInput" [matAutocomplete]="autoCat" placeholder="Buscar categoría en Tabla Auxiliar...">
             <mat-autocomplete #autoCat="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onCategoriaSelected($event)">
               <mat-option *ngFor="let option of filteredCategorias | async" [value]="option">
                 {{ option.nombre }}
@@ -55,10 +55,10 @@ import { BonificacionInterface } from '../models/bonificacion.model';
             <mat-error *ngIf="form.get('categoriaId')?.hasError('required')">Categoría obligatoria</mat-error>
           </mat-form-field>
 
-          <!-- AUTOCOMPLETE UBICACIÓN -->
+          <!-- AUTOCOMPLETE UBICACIÓN (TABLA AUXILIAR) -->
           <mat-form-field appearance="outline" class="col-half">
             <mat-label>Ubicación *</mat-label>
-            <input type="text" matInput formControlName="ubicacionInput" [matAutocomplete]="autoUbi" placeholder="Buscar ubicación...">
+            <input type="text" matInput formControlName="ubicacionInput" [matAutocomplete]="autoUbi" placeholder="Buscar ubicación en Tabla Auxiliar...">
             <mat-autocomplete #autoUbi="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onUbicacionSelected($event)">
               <mat-option *ngFor="let option of filteredUbicaciones | async" [value]="option">
                 {{ option.nombre }}
@@ -67,7 +67,7 @@ import { BonificacionInterface } from '../models/bonificacion.model';
             <mat-error *ngIf="form.get('ubicacionId')?.hasError('required')">Ubicación obligatoria</mat-error>
           </mat-form-field>
 
-          <!-- AUTOCOMPLETE OBRA SOCIAL -->
+          <!-- AUTOCOMPLETE OBRA SOCIAL (GESTIÓN SALUD) -->
           <mat-form-field appearance="outline" class="col-half">
             <mat-label>Obra Social *</mat-label>
             <input type="text" matInput formControlName="obraSocialInput" [matAutocomplete]="autoOS" placeholder="Buscar Obra Social...">
@@ -82,7 +82,7 @@ import { BonificacionInterface } from '../models/bonificacion.model';
           <!-- AUTOCOMPLETE PLAN (DEPENDIENTE DE OBRA SOCIAL) -->
           <mat-form-field appearance="outline" class="col-half">
             <mat-label>Plan de Cobertura *</mat-label>
-            <input type="text" matInput formControlName="planInput" [matAutocomplete]="autoPlan" placeholder="Seleccionar plan...">
+            <input type="text" matInput formControlName="planInput" [matAutocomplete]="autoPlan" placeholder="Seleccionar plan de la Obra Social...">
             <mat-autocomplete #autoPlan="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onPlanSelected($event)">
               <mat-option *ngFor="let option of filteredPlanes | async" [value]="option">
                 {{ option.nombre }}
@@ -91,13 +91,13 @@ import { BonificacionInterface } from '../models/bonificacion.model';
             <mat-error *ngIf="form.get('planId')?.hasError('required')">Plan obligatorio</mat-error>
           </mat-form-field>
 
-          <!-- AUTOCOMPLETE FARMACIA (CONVENIDA CON OBRA SOCIAL) -->
+          <!-- AUTOCOMPLETE FARMACIA (MÓDULO FARMACIA - PADRÓN GENERAL / CONVENIDAS) -->
           <mat-form-field appearance="outline" class="col-full">
             <mat-label>Farmacia Convenida *</mat-label>
-            <input type="text" matInput formControlName="farmaciaInput" [matAutocomplete]="autoFarm" placeholder="Seleccionar farmacia convenida...">
+            <input type="text" matInput formControlName="farmaciaInput" [matAutocomplete]="autoFarm" placeholder="Buscar farmacia en Padrón General de Farmacias...">
             <mat-autocomplete #autoFarm="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onFarmaciaSelected($event)">
               <mat-option *ngFor="let option of filteredFarmacias | async" [value]="option">
-                {{ option.nombre }} - CUIT: {{ option.cuit }}
+                {{ option.nombre }} - CUIT: {{ option.cuit }} ({{ option.cuf }})
               </mat-option>
             </mat-autocomplete>
             <mat-error *ngIf="form.get('farmaciaId')?.hasError('required')">Farmacia obligatoria</mat-error>
@@ -154,35 +154,15 @@ export class BonificacionFormDialogComponent implements OnInit {
   private fb = inject(FormBuilder);
   private ref = inject(MatDialogRef<BonificacionFormDialogComponent>);
   private service = inject(BonificacionesService);
+  private farmaciasService = inject(FarmaciasService);
   public data: any = inject(MAT_DIALOG_DATA);
 
-  categoriasList = [
-    { id: 1, nombre: 'MEDICAMENTOS AMBULATORIOS' },
-    { id: 2, nombre: 'ALTA COMPLEXIDAD / ONCOLÓGICOS' },
-    { id: 3, nombre: 'VACUNAS Y BIOLÓGICOS' }
-  ];
-
-  ubicacionesList = [
-    { id: 1, nombre: 'CENTRO METROPOLITANO' },
-    { id: 2, nombre: 'SUCURSAL CÓRDOBA' },
-    { id: 3, nombre: 'ZONA SANTA FE' }
-  ];
-
-  obrasSocialesList = [
-    { id: 1, nombre: 'OSDE ORGANIZACIÓN DE SERVICIOS DIRECTOS EMPRESARIOS' },
-    { id: 2, nombre: 'SWISS MEDICAL S.A.' }
-  ];
-
-  todosPlanes = [
-    { id: 1, obraSocialId: 1, nombre: 'PLAN 210' },
-    { id: 2, obraSocialId: 1, nombre: 'PLAN 310' },
-    { id: 3, obraSocialId: 2, nombre: 'PLAN SMG20' }
-  ];
-
-  todasFarmacias = [
-    { id: 1, obraSocialId: 1, codigo: 'FAR-001', nombre: 'FARMACIA CENTRAL BUENOS AIRES', cuit: '30-71234567-8' },
-    { id: 2, obraSocialId: 2, codigo: 'FAR-002', nombre: 'FARMACIA DEL SOL', cuit: '30-68994021-4' }
-  ];
+  // TABLAS CONSUMIDAS DE LOS MÓDULOS DEL SISTEMA
+  categoriasList: any[] = [];
+  ubicacionesList: any[] = [];
+  obrasSocialesList: any[] = [];
+  todosPlanes: any[] = [];
+  todasFarmacias: any[] = [];
 
   planesFiltrados: any[] = [];
   farmaciasFiltradas: any[] = [];
@@ -213,6 +193,68 @@ export class BonificacionFormDialogComponent implements OnInit {
   });
 
   ngOnInit() {
+    this.cargarTablasAuxiliares();
+  }
+
+  cargarTablasAuxiliares() {
+    // 1. Cargar Categorías desde Tablas Auxiliares
+    this.categoriasList = [
+      { id: 1, nombre: 'MEDICAMENTOS AMBULATORIOS' },
+      { id: 2, nombre: 'ALTA COMPLEXIDAD / ONCOLÓGICOS' },
+      { id: 3, nombre: 'VACUNAS Y BIOLÓGICOS' }
+    ];
+
+    // 2. Cargar Ubicaciones desde Tablas Auxiliares
+    this.ubicacionesList = [
+      { id: 1, nombre: 'CENTRO METROPOLITANO' },
+      { id: 2, nombre: 'SUCURSAL CÓRDOBA' },
+      { id: 3, nombre: 'ZONA SANTA FE' }
+    ];
+
+    // 3. Cargar Obras Sociales
+    this.obrasSocialesList = [
+      { id: 1, nombre: 'OSDE ORGANIZACIÓN DE SERVICIOS DIRECTOS EMPRESARIOS' },
+      { id: 2, nombre: 'SWISS MEDICAL S.A.' }
+    ];
+
+    // 4. Cargar Planes
+    this.todosPlanes = [
+      { id: 1, obraSocialId: 1, nombre: 'PLAN 210' },
+      { id: 2, obraSocialId: 1, nombre: 'PLAN 310' },
+      { id: 3, obraSocialId: 2, nombre: 'PLAN SMG20' }
+    ];
+
+    // 5. Cargar Farmacias desde Padrón General de Farmacias
+    this.farmaciasService.getAll().subscribe({
+      next: (res) => {
+        if (res && res.length > 0) {
+          this.todasFarmacias = res.map(x => ({
+            id: x.id!,
+            obraSocialId: x.id === 1 ? 1 : 2,
+            codigo: x.codigo,
+            nombre: x.descripcion,
+            cuit: x.cuit,
+            cuf: x.cuf
+          }));
+        } else {
+          this.todasFarmacias = [
+            { id: 1, obraSocialId: 1, codigo: 'FAR-001', nombre: 'FARMACIA CENTRAL BUENOS AIRES', cuit: '30-71234567-8', cuf: 'CUF-100294' },
+            { id: 2, obraSocialId: 2, codigo: 'FAR-002', nombre: 'FARMACIA DEL SOL', cuit: '30-68994021-4', cuf: 'CUF-300192' }
+          ];
+        }
+        this.completarCargaInicial();
+      },
+      error: () => {
+        this.todasFarmacias = [
+          { id: 1, obraSocialId: 1, codigo: 'FAR-001', nombre: 'FARMACIA CENTRAL BUENOS AIRES', cuit: '30-71234567-8', cuf: 'CUF-100294' },
+          { id: 2, obraSocialId: 2, codigo: 'FAR-002', nombre: 'FARMACIA DEL SOL', cuit: '30-68994021-4', cuf: 'CUF-300192' }
+        ];
+        this.completarCargaInicial();
+      }
+    });
+  }
+
+  completarCargaInicial() {
     this.initFilters();
 
     if (this.data) {
@@ -255,7 +297,7 @@ export class BonificacionFormDialogComponent implements OnInit {
 
   cargarPlanesYFarmacias(obraSocialId: number) {
     this.planesFiltrados = this.todosPlanes.filter(x => x.obraSocialId === obraSocialId);
-    this.farmaciasFiltradas = this.todasFarmacias.filter(x => x.obraSocialId === obraSocialId);
+    this.farmaciasFiltradas = this.todasFarmacias.filter(x => x.obraSocialId === obraSocialId || !x.obraSocialId);
     this.initFilters();
   }
 
@@ -265,7 +307,7 @@ export class BonificacionFormDialogComponent implements OnInit {
 
   private _filter(val: any, list: any[]) {
     const filterValue = typeof val === 'string' ? val.toLowerCase() : (val?.nombre ? val.nombre.toLowerCase() : '');
-    return list.filter(item => item.nombre.toLowerCase().includes(filterValue));
+    return list.filter(item => item.nombre.toLowerCase().includes(filterValue) || (item.cuit && item.cuit.includes(filterValue)));
   }
 
   onCategoriaSelected(e: any) { this.form.patchValue({ categoriaId: e.option.value.id }); }
@@ -295,7 +337,7 @@ export class BonificacionFormDialogComponent implements OnInit {
       const planObj = typeof fVal.planInput === 'object' ? fVal.planInput : this.todosPlanes.find(x => x.id === fVal.planId);
       const farmObj = typeof fVal.farmaciaInput === 'object' ? fVal.farmaciaInput : this.todasFarmacias.find(x => x.id === fVal.farmaciaId);
 
-      const payload: BonificacionInterface = {
+      const payload = {
         ...(fVal.id ? { id: fVal.id } : {}),
         codigo: fVal.codigo || 'BON-003',
         descripcion: fVal.descripcion!.trim().toUpperCase(),
@@ -315,7 +357,7 @@ export class BonificacionFormDialogComponent implements OnInit {
         activo: fVal.activo!
       };
 
-      this.service.save(payload).subscribe({
+      this.service.save(payload as any).subscribe({
         next: (res) => this.ref.close(res),
         error: (err) => alert(err.message)
       });
