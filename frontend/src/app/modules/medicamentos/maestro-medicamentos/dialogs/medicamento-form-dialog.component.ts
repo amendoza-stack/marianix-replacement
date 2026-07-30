@@ -5,15 +5,17 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { Observable } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
 import { DrogasService, MonodrogasService, PotenciasService, ViasAdministracionService, AccionesTerapeurticasService, MedicamentosMasterService } from '../services/medicamentos.service';
 import { MedicamentosValidators } from '../validators/medicamentos.validators';
 import { PotenciaInterface, ViaAdministracionInterface, AccionTerapeurticaInterface } from '../models/medicamentos-master.model';
 
-// 1. DIÁLOGO DROGAS
 @Component({
   selector: 'app-droga-form-dialog',
   standalone: true,
@@ -76,7 +78,6 @@ export class DrogaFormDialogComponent implements OnInit {
   onSave() { if (this.form.valid) this.service.save(this.form.getRawValue() as any).subscribe((res: any) => this.ref.close(res)); }
 }
 
-// 2. DIÁLOGO MONODROGAS
 @Component({
   selector: 'app-monodroga-form-dialog',
   standalone: true,
@@ -163,7 +164,6 @@ export class MonodrogaFormDialogComponent implements OnInit {
   }
 }
 
-// 3. DIÁLOGO POTENCIAS
 @Component({
   selector: 'app-potencia-form-dialog',
   standalone: true,
@@ -251,7 +251,6 @@ export class PotenciaFormDialogComponent implements OnInit {
   }
 }
 
-// 4. DIÁLOGO VÍAS DE ADMINISTRACIÓN
 @Component({
   selector: 'app-via-administracion-form-dialog',
   standalone: true,
@@ -332,7 +331,6 @@ export class ViaAdministracionFormDialogComponent implements OnInit {
   }
 }
 
-// 5. DIÁLOGO ACCIONES TERAPÉUTICAS (NUEVO ABM FASE 6)
 @Component({
   selector: 'app-accion-terapeutica-form-dialog',
   standalone: true,
@@ -413,7 +411,7 @@ export class AccionTerapeurticaFormDialogComponent implements OnInit {
   }
 }
 
-// 6. DIÁLOGO MEDICAMENTO CON INTEGRACIÓN DE ACCIONES TERAPÉUTICAS
+// 6. MAESTRO DE MEDICAMENTOS (FORMULARIO ACTUALIZADO CON AUTOCOMPLETES)
 @Component({
   selector: 'app-medicamento-form-dialog',
   standalone: true,
@@ -472,6 +470,7 @@ export class AccionTerapeurticaFormDialogComponent implements OnInit {
                 {{ option.nombre }}
               </mat-option>
             </mat-autocomplete>
+            <mat-error *ngIf="form.get('potenciaId')?.hasError('required')">Campo obligatorio</mat-error>
           </mat-form-field>
 
           <!-- AUTOCOMPLETE VÍA DE ADMINISTRACIÓN -->
@@ -483,25 +482,27 @@ export class AccionTerapeurticaFormDialogComponent implements OnInit {
                 {{ option.nombre }}
               </mat-option>
             </mat-autocomplete>
-          </mat-form-field>
-
-          <!-- AUTOCOMPLETE ACCIÓN TERAPÉUTICA -->
-          <mat-form-field appearance="outline" class="col-third">
-            <mat-label>Acción Terapéutica *</mat-label>
-            <input type="text" matInput formControlName="accionInput" [matAutocomplete]="autoAccion" placeholder="Ej: ANALGÉSICO...">
-            <mat-autocomplete #autoAccion="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onAccionSelected($event)">
-              <mat-option *ngFor="let option of filteredAcciones | async" [value]="option">
-                {{ option.nombre }}
-              </mat-option>
-            </mat-autocomplete>
+            <mat-error *ngIf="form.get('viaAdministracionId')?.hasError('required')">Campo obligatorio</mat-error>
           </mat-form-field>
 
           <!-- AUTOCOMPLETE FORMA FARMACÉUTICA -->
-          <mat-form-field appearance="outline" class="col-half">
+          <mat-form-field appearance="outline" class="col-third">
             <mat-label>Forma Farmacéutica *</mat-label>
             <input type="text" matInput formControlName="formaFarmaceuticaInput" [matAutocomplete]="autoForma" placeholder="Ej: COMPRIMIDO...">
             <mat-autocomplete #autoForma="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onFormaSelected($event)">
               <mat-option *ngFor="let option of filteredFormas | async" [value]="option">
+                {{ option.nombre }}
+              </mat-option>
+            </mat-autocomplete>
+            <mat-error *ngIf="form.get('formaFarmaceuticaId')?.hasError('required')">Campo obligatorio</mat-error>
+          </mat-form-field>
+
+          <!-- AUTOCOMPLETE ACCIÓN TERAPÉUTICA -->
+          <mat-form-field appearance="outline" class="col-half">
+            <mat-label>Acción Terapéutica</mat-label>
+            <input type="text" matInput formControlName="accionInput" [matAutocomplete]="autoAccion" placeholder="Ej: ANALGÉSICO...">
+            <mat-autocomplete #autoAccion="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onAccionSelected($event)">
+              <mat-option *ngFor="let option of filteredAcciones | async" [value]="option">
                 {{ option.nombre }}
               </mat-option>
             </mat-autocomplete>
@@ -546,6 +547,7 @@ export class AccionTerapeurticaFormDialogComponent implements OnInit {
             <input matInput [matDatepicker]="picker" formControlName="vigenciaFecha">
             <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
+            <mat-error *ngIf="form.get('vigenciaFecha')?.hasError('required')">Campo obligatorio</mat-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="col-half">
@@ -601,7 +603,6 @@ export class MedicamentoFormDialogComponent implements OnInit {
   private monodrogasService = inject(MonodrogasService);
   public data: any = inject(MAT_DIALOG_DATA);
 
-  // LISTAS DE AUTOCOMPLETE
   labList = [
     { id: 1, nombre: 'LABORATORIOS BAGO S.A.' },
     { id: 2, nombre: 'ROEMMERS S.A.I.C.F.' },
@@ -632,17 +633,17 @@ export class MedicamentoFormDialogComponent implements OnInit {
     codigo: [''],
     descripcion: ['', Validators.required],
     laboratorioId: [1, Validators.required],
-    laboratorioInput: [{ id: 1, nombre: 'LABORATORIOS BAGO S.A.' }],
+    laboratorioInput: [{ id: 1, nombre: 'LABORATORIOS BAGO S.A.' }, Validators.required],
     monodrogaId: [1, Validators.required],
-    monodrogaInput: [{ id: 1, nombre: 'ÁCIDO ACETILSALICÍLICO 500 MG' }],
-    potenciaId: [1],
-    potenciaInput: [{ id: 1, nombre: 'MILIGRAMOS (MG)' }],
-    viaAdministracionId: [1],
-    viaInput: [{ id: 1, nombre: 'ORAL' }],
+    monodrogaInput: [{ id: 1, nombre: 'ÁCIDO ACETILSALICÍLICO 500 MG' }, Validators.required],
+    potenciaId: [1, Validators.required],
+    potenciaInput: [{ id: 1, nombre: 'MILIGRAMOS (MG)' }, Validators.required],
+    viaAdministracionId: [1, Validators.required],
+    viaInput: [{ id: 1, nombre: 'ORAL' }, Validators.required],
+    formaFarmaceuticaId: [1, Validators.required],
+    formaFarmaceuticaInput: [{ id: 1, nombre: 'COMPRIMIDO' }, Validators.required],
     accionTerapeurticaId: [1],
     accionInput: [{ id: 1, nombre: 'ANALGÉSICO' }],
-    formaFarmaceuticaId: [1],
-    formaFarmaceuticaInput: [{ id: 1, nombre: 'COMPRIMIDO' }],
     tamano: ['30 COMPRIMIDOS'],
     codigoBarras: [''],
     codigoTrazabilidad: [''],
@@ -656,22 +657,22 @@ export class MedicamentoFormDialogComponent implements OnInit {
   });
 
   ngOnInit() {
-    this.monodrogasService.getAll().subscribe(res => {
+    this.monodrogasService.getAll().subscribe((res: any[]) => {
       this.monoList = res.map(x => ({ id: x.id, nombre: x.descripcion }));
       this.initFilters();
     });
 
-    this.potenciasService.getAll().subscribe(res => {
+    this.potenciasService.getAll().subscribe((res: PotenciaInterface[]) => {
       this.potList = res.map(x => ({ id: x.id, nombre: `${x.descripcion} (${x.abreviatura})` }));
       this.initFilters();
     });
 
-    this.viasService.getAll().subscribe(res => {
+    this.viasService.getAll().subscribe((res: ViaAdministracionInterface[]) => {
       this.viaList = res.map(x => ({ id: x.id, nombre: x.descripcion }));
       this.initFilters();
     });
 
-    this.accionesService.getAll().subscribe(res => {
+    this.accionesService.getAll().subscribe((res: AccionTerapeurticaInterface[]) => {
       this.accionList = res.map(x => ({ id: x.id, nombre: x.descripcion }));
       this.initFilters();
     });
@@ -686,32 +687,32 @@ export class MedicamentoFormDialogComponent implements OnInit {
   initFilters() {
     this.filteredLaboratorios = this.form.get('laboratorioInput')!.valueChanges.pipe(
       startWith(''),
-      map(val => this._filter(val, this.labList))
+      map((val: any) => this._filter(val, this.labList))
     );
 
     this.filteredMonodrogas = this.form.get('monodrogaInput')!.valueChanges.pipe(
       startWith(''),
-      map(val => this._filter(val, this.monoList))
+      map((val: any) => this._filter(val, this.monoList))
     );
 
     this.filteredPotencias = this.form.get('potenciaInput')!.valueChanges.pipe(
       startWith(''),
-      map(val => this._filter(val, this.potList))
+      map((val: any) => this._filter(val, this.potList))
     );
 
     this.filteredVias = this.form.get('viaInput')!.valueChanges.pipe(
       startWith(''),
-      map(val => this._filter(val, this.viaList))
+      map((val: any) => this._filter(val, this.viaList))
     );
 
     this.filteredAcciones = this.form.get('accionInput')!.valueChanges.pipe(
       startWith(''),
-      map(val => this._filter(val, this.accionList))
+      map((val: any) => this._filter(val, this.accionList))
     );
 
     this.filteredFormas = this.form.get('formaFarmaceuticaInput')!.valueChanges.pipe(
       startWith(''),
-      map(val => this._filter(val, this.formaList))
+      map((val: any) => this._filter(val, this.formaList))
     );
   }
 
@@ -734,7 +735,7 @@ export class MedicamentoFormDialogComponent implements OnInit {
   onSave() {
     if (this.form.valid) {
       const val = this.form.getRawValue();
-      this.service.save(val as any).subscribe((res: any) => this.ref.close(res));
+      this.service.save(val as any).subscribe((res: any) => this.ref.close(res), (err: any) => alert(err.message));
     }
   }
 }
