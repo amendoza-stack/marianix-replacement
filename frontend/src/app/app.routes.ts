@@ -39,9 +39,10 @@ export const routes: Routes = [
       { path: 'gestion-salud/obras-sociales', loadComponent: () => import('./modules/gestion-salud/obras-sociales/pages/obras-sociales-page.component').then(m => m.ObrasSocialesPageComponent) },
       { path: 'gestion-salud/laboratorios', loadComponent: () => import('./modules/gestion-salud/laboratorios/pages/laboratorios-page.component').then(m => m.LaboratoriosPageComponent) },
 
-      // MEDICAMENTOS (NUEVAS RUTAS)
+      // MEDICAMENTOS
       { path: 'medicamentos/drogas', loadComponent: () => import('./modules/medicamentos/maestro-medicamentos/pages/medicamentos-pages').then(m => m.DrogasPageComponent) },
       { path: 'medicamentos/monodrogas', loadComponent: () => import('./modules/medicamentos/maestro-medicamentos/pages/medicamentos-pages').then(m => m.MonodrogasPageComponent) },
+      { path: 'medicamentos/potencias', loadComponent: () => import('./modules/medicamentos/maestro-medicamentos/pages/medicamentos-pages').then(m => m.PotenciasPageComponent) },
       { path: 'medicamentos/maestro', loadComponent: () => import('./modules/medicamentos/maestro-medicamentos/pages/medicamentos-pages').then(m => m.MaestroMedicamentosPageComponent) }
     ]
   },

@@ -1,7 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
-import { DrogaInterface, MonodrogaInterface, MaestroMedicamentoInterface } from '../models/medicamentos-master.model';
+import { DrogaInterface, MonodrogaInterface, PotenciaInterface, MaestroMedicamentoInterface } from '../models/medicamentos-master.model';
 
 @Injectable({ providedIn: 'root' })
 export class DrogasService {
@@ -58,7 +58,7 @@ export class MonodrogasService {
   }
 
   save(item: MonodrogaInterface): Observable<MonodrogaInterface> {
-    const dupSSS = this.list.find(x => x.codigoSSS === item.codigoSSS && x.id !== item.id);
+    const dupSSS = item.codigoSSS ? this.list.find(x => x.codigoSSS === item.codigoSSS && x.id !== item.id) : null;
     if (dupSSS) return throwError(() => new Error(`El Código SSS '${item.codigoSSS}' ya está registrado.`));
 
     if (item.id) {
@@ -88,20 +88,68 @@ export class MonodrogasService {
 }
 
 @Injectable({ providedIn: 'root' })
+export class PotenciasService {
+  private list: PotenciaInterface[] = [
+    { id: 1, codigo: 'POT-001', descripcion: 'MILIGRAMOS', abreviatura: 'MG', activo: true },
+    { id: 2, codigo: 'POT-002', descripcion: 'MICROGRAMOS', abreviatura: 'MCG', activo: true },
+    { id: 3, codigo: 'POT-003', descripcion: 'GRAMOS', abreviatura: 'G', activo: true },
+    { id: 4, codigo: 'POT-004', descripcion: 'MILILITROS', abreviatura: 'ML', activo: true },
+    { id: 5, codigo: 'POT-005', descripcion: 'UNIDADES INTERNACIONALES', abreviatura: 'UI', activo: true },
+    { id: 6, codigo: 'POT-006', descripcion: 'MILIEQUIVALENTES', abreviatura: 'MEQ', activo: true }
+  ];
+
+  getAll(): Observable<PotenciaInterface[]> {
+    return of(JSON.parse(JSON.stringify(this.list))).pipe(delay(200));
+  }
+
+  save(item: PotenciaInterface): Observable<PotenciaInterface> {
+    item.descripcion = item.descripcion.trim().toUpperCase();
+    item.abreviatura = item.abreviatura.trim().toUpperCase();
+
+    const dup = this.list.find(x => (x.descripcion === item.descripcion || x.abreviatura === item.abreviatura) && x.id !== item.id);
+    if (dup) return throwError(() => new Error(`La potencia con la descripción '${item.descripcion}' o abreviatura '${item.abreviatura}' ya existe.`));
+
+    if (item.id) {
+      const idx = this.list.findIndex(x => x.id === item.id);
+      if (idx !== -1) {
+        this.list[idx] = { ...this.list[idx], ...item };
+        return of(this.list[idx]).pipe(delay(200));
+      }
+    }
+    const newItem: PotenciaInterface = {
+      ...item,
+      id: Date.now(),
+      codigo: 'POT-' + String(this.list.length + 1).padStart(3, '0')
+    };
+    this.list.unshift(newItem);
+    return of(newItem).pipe(delay(200));
+  }
+
+  delete(id: number): Observable<boolean> {
+    const idx = this.list.findIndex(x => x.id === id);
+    if (idx !== -1) {
+      this.list.splice(idx, 1);
+      return of(true).pipe(delay(200));
+    }
+    return of(false);
+  }
+}
+
+@Injectable({ providedIn: 'root' })
 export class MedicamentosMasterService {
   private list: MaestroMedicamentoInterface[] = [
     {
       id: 1, codigo: 'MED-001', descripcion: 'ASPIRINNET 500 MG x 30 COMP.', tamano: '30 COMPRIMIDOS',
       laboratorioId: 1, laboratorioNombre: 'LABORATORIOS BAGO S.A.', codOrigenPrecio: 'FAB', codIva: '21%',
       vigenciaFecha: '2026-12-31', codigoBarras: '7791234567890', monodrogaId: 1, monodrogaNombre: 'ÁCIDO ACETILSALICÍLICO 500 MG',
-      potencia: '500 MG', formaFarmaceutica: 'COMPRIMIDO', viaAdministracion: 'ORAL', contenido: '30 UNIDADES',
+      potenciaId: 1, potenciaNombre: 'MILIGRAMOS (MG)', potencia: '500 MG', formaFarmaceutica: 'COMPRIMIDO', viaAdministracion: 'ORAL', contenido: '30 UNIDADES',
       accion: 'ANALGÉSICO / ANTIPIRÉTICO', multidroga: 'No', estado: 'Activo'
     },
     {
       id: 2, codigo: 'MED-002', descripcion: 'IBUPROFENO 400 MG x 20 CÁPS.', tamano: '20 CÁPSULAS',
       laboratorioId: 2, laboratorioNombre: 'ROEMMERS S.A.I.C.F.', codOrigenPrecio: 'FAB', codIva: '21%',
       vigenciaFecha: '2026-10-15', codigoBarras: '7799876543210', monodrogaId: 2, monodrogaNombre: 'IBUPROFENO 400 MG',
-      potencia: '400 MG', formaFarmaceutica: 'CÁPSULA BLANDA', viaAdministracion: 'ORAL', contenido: '20 UNIDADES',
+      potenciaId: 1, potenciaNombre: 'MILIGRAMOS (MG)', potencia: '400 MG', formaFarmaceutica: 'CÁPSULA BLANDA', viaAdministracion: 'ORAL', contenido: '20 UNIDADES',
       accion: 'ANTIINFLAMATORIO', multidroga: 'No', estado: 'Activo'
     }
   ];

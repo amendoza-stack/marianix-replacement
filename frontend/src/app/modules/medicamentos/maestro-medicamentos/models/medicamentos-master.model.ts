@@ -13,6 +13,14 @@ export interface MonodrogaInterface {
   activo: boolean;
 }
 
+export interface PotenciaInterface {
+  id: number;
+  codigo: string;
+  descripcion: string;
+  abreviatura: string;
+  activo: boolean;
+}
+
 export interface MaestroMedicamentoInterface {
   id: number;
   codigo: string;
@@ -26,6 +34,8 @@ export interface MaestroMedicamentoInterface {
   codigoBarras?: string;
   monodrogaId: number;
   monodrogaNombre?: string;
+  potenciaId?: number;
+  potenciaNombre?: string;
   potencia: string;
   formaFarmaceutica: string;
   viaAdministracion: string;
