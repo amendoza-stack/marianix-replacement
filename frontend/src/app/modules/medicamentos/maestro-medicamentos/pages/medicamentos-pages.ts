@@ -10,8 +10,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { DrogasService, MonodrogasService, MedicamentosMasterService } from './medicamentos.service';
-import { DrogaFormDialogComponent, MonodrogaFormDialogComponent, MedicamentoFormDialogComponent } from './medicamento-form-dialog.component';
+import { DrogasService, MonodrogasService, MedicamentosMasterService } from '../services/medicamentos.service';
+import { DrogaFormDialogComponent, MonodrogaFormDialogComponent, MedicamentoFormDialogComponent } from '../dialogs/medicamento-form-dialog.component';
 
 @Component({
   selector: 'app-drogas-page',
@@ -66,7 +66,7 @@ export class DrogasPageComponent implements OnInit {
   @ViewChild(MatSort) sort!: MatSort;
 
   ngOnInit() { this.load(); }
-  load() { this.service.getAll().subscribe(res => { this.dataSource.data = res; this.dataSource.paginator = this.paginator; this.dataSource.sort = this.sort; }); }
+  load() { this.service.getAll().subscribe((res: any[]) => { this.dataSource.data = res; this.dataSource.paginator = this.paginator; this.dataSource.sort = this.sort; }); }
   applyFilter() { this.dataSource.filter = this.searchTerm.trim().toLowerCase(); }
   openForm(item?: any) {
     this.dialog.open(DrogaFormDialogComponent, { width: '420px', data: item }).afterClosed().subscribe(res => {
@@ -134,7 +134,7 @@ export class MonodrogasPageComponent implements OnInit {
   @ViewChild(MatSort) sort!: MatSort;
 
   ngOnInit() { this.load(); }
-  load() { this.service.getAll().subscribe(res => { this.dataSource.data = res; this.dataSource.paginator = this.paginator; this.dataSource.sort = this.sort; }); }
+  load() { this.service.getAll().subscribe((res: any[]) => { this.dataSource.data = res; this.dataSource.paginator = this.paginator; this.dataSource.sort = this.sort; }); }
   applyFilter() { this.dataSource.filter = this.searchTerm.trim().toLowerCase(); }
   openForm(item?: any) {
     this.dialog.open(MonodrogaFormDialogComponent, { width: '440px', data: item }).afterClosed().subscribe(res => {
@@ -204,7 +204,7 @@ export class MaestroMedicamentosPageComponent implements OnInit {
   @ViewChild(MatSort) sort!: MatSort;
 
   ngOnInit() { this.load(); }
-  load() { this.service.getAll().subscribe(res => { this.dataSource.data = res; this.dataSource.paginator = this.paginator; this.dataSource.sort = this.sort; }); }
+  load() { this.service.getAll().subscribe((res: any[]) => { this.dataSource.data = res; this.dataSource.paginator = this.paginator; this.dataSource.sort = this.sort; }); }
   applyFilter() { this.dataSource.filter = this.searchTerm.trim().toLowerCase(); }
   openForm(item?: any) {
     this.dialog.open(MedicamentoFormDialogComponent, { width: '680px', data: item }).afterClosed().subscribe(res => {
