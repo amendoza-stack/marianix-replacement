@@ -200,7 +200,7 @@ export class PotenciasPageComponent implements OnInit {
   cols = ['codigo', 'descripcion', 'abreviatura', 'activo', 'acciones'];
   searchTerm = '';
   @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: Sort;
+  @ViewChild(MatSort) sort!: MatSort;
 
   ngOnInit() { this.load(); }
   load() { this.service.getAll().subscribe((res: any[]) => { this.dataSource.data = res; this.dataSource.paginator = this.paginator; this.dataSource.sort = this.sort; }); }
