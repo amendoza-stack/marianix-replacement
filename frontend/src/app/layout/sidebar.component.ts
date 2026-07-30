@@ -35,7 +35,6 @@ import { MatExpansionModule } from '@angular/material/expansion';
 
           <div class="submenu-list">
             <a routerLink="/configuracion/usuarios" routerLinkActive="active" class="submenu-item"><mat-icon>person</mat-icon> Usuarios</a>
-            <!-- OPCIÓN UNIFICADA: ROLES Y PERMISOS -->
             <a routerLink="/configuracion/roles" routerLinkActive="active" class="submenu-item"><mat-icon>admin_panel_settings</mat-icon> Roles y Permisos</a>
             <a routerLink="/configuracion/paises" routerLinkActive="active" class="submenu-item"><mat-icon>public</mat-icon> Países</a>
             <a routerLink="/configuracion/provincias" routerLinkActive="active" class="submenu-item"><mat-icon>map</mat-icon> Provincias</a>
@@ -44,6 +43,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
             <a routerLink="/configuracion/especialidades" routerLinkActive="active" class="submenu-item"><mat-icon>school</mat-icon> Especialidades</a>
             <a routerLink="/configuracion/observaciones" routerLinkActive="active" class="submenu-item"><mat-icon>visibility</mat-icon> Observaciones</a>
             <a routerLink="/configuracion/patologias" routerLinkActive="active" class="submenu-item"><mat-icon>coronavirus</mat-icon> Patologías</a>
+            <a routerLink="/configuracion/categorias" routerLinkActive="active" class="submenu-item"><mat-icon>category</mat-icon> Categorías Medicamentos</a>
             <a routerLink="/configuracion/ubicaciones" routerLinkActive="active" class="submenu-item"><mat-icon>place</mat-icon> Ubicaciones</a>
             <a routerLink="/configuracion/vinculos" routerLinkActive="active" class="submenu-item"><mat-icon>family_restroom</mat-icon> Vínculos</a>
             <a routerLink="/configuracion/zonas" routerLinkActive="active" class="submenu-item"><mat-icon>my_location</mat-icon> Zonas</a>

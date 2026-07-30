@@ -17,7 +17,7 @@ export const routes: Routes = [
       { path: 'configuracion/roles', loadComponent: () => import('./modules/configuracion/roles/components/roles-page-list.component').then(m => m.RolesPageListComponent) },
       { path: 'configuracion/permisos', redirectTo: 'configuracion/roles', pathMatch: 'full' },
 
-      // RUTAS DE LAS 12 TABLAS AUXILIARES
+      // TABLAS AUXILIARES
       { path: 'configuracion/paises', loadComponent: () => import('./modules/configuracion/tablas-auxiliares/pages/paises-page.component').then(m => m.PaisesPageComponent) },
       { path: 'configuracion/provincias', loadComponent: () => import('./modules/configuracion/tablas-auxiliares/pages/provincias-page.component').then(m => m.ProvinciasPageComponent) },
       { path: 'configuracion/ubicaciones', loadComponent: () => import('./modules/configuracion/tablas-auxiliares/pages/ubicaciones-page.component').then(m => m.UbicacionesPageComponent) },
@@ -29,7 +29,11 @@ export const routes: Routes = [
       { path: 'configuracion/observaciones', loadComponent: () => import('./modules/configuracion/tablas-auxiliares/pages/observaciones-page.component').then(m => m.ObservacionesPageComponent) },
       { path: 'configuracion/vinculos', loadComponent: () => import('./modules/configuracion/tablas-auxiliares/pages/vinculos-page.component').then(m => m.VinculosPageComponent) },
       { path: 'configuracion/periodos', loadComponent: () => import('./modules/configuracion/tablas-auxiliares/pages/periodos-page.component').then(m => m.PeriodosPageComponent) },
-      { path: 'configuracion/droguerias', loadComponent: () => import('./modules/configuracion/tablas-auxiliares/pages/droguerias-page.component').then(m => m.DrogueriasPageComponent) }
+      { path: 'configuracion/droguerias', loadComponent: () => import('./modules/configuracion/tablas-auxiliares/pages/droguerias-page.component').then(m => m.DrogueriasPageComponent) },
+
+      // GESTIÓN MÉDICA
+      { path: 'gestion-medica/afiliados', loadComponent: () => import('./modules/gestion-medica/afiliados/pages/afiliados-page.component').then(m => m.AfiliadosPageComponent) },
+      { path: 'gestion-medica/medicos', loadComponent: () => import('./modules/gestion-medica/medicos/pages/medicos-page.component').then(m => m.MedicosPageComponent) }
     ]
   },
 
