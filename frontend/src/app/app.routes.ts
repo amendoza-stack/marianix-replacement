@@ -13,6 +13,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: 'dashboard', loadComponent: () => import('./modules/dashboard/dashboard.component').then(m => m.DashboardComponent) },
+      { path: 'configuracion/usuarios', loadComponent: () => import('./modules/configuracion/usuarios/components/usuarios-page-list.component').then(m => m.UsuariosPageListComponent) },
       { path: 'configuracion/roles', loadComponent: () => import('./modules/configuracion/roles/components/roles-page-list.component').then(m => m.RolesPageListComponent) },
       { path: 'configuracion/permisos', loadComponent: () => import('./modules/configuracion/roles/components/roles-page-list.component').then(m => m.RolesPageListComponent) }
     ]
