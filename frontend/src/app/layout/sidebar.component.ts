@@ -51,7 +51,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
           </div>
         </mat-expansion-panel>
 
-        <!-- GESTIÓN MÉDICA -->
+        <!-- GESTIÓN MÉDICA (ÚNICAMENTE AFILIADOS Y MÉDICOS) -->
         <mat-expansion-panel class="menu-panel" [expanded]="true">
           <mat-expansion-panel-header class="menu-header">
             <mat-panel-title>
@@ -63,11 +63,6 @@ import { MatExpansionModule } from '@angular/material/expansion';
           <div class="submenu-list">
             <a routerLink="/gestion-medica/afiliados" routerLinkActive="active" class="submenu-item"><mat-icon>people</mat-icon> Afiliados</a>
             <a routerLink="/gestion-medica/medicos" routerLinkActive="active" class="submenu-item"><mat-icon>health_and_safety</mat-icon> Médicos</a>
-            <a routerLink="/gestion-medica/obras-sociales" routerLinkActive="active" class="submenu-item"><mat-icon>local_hospital</mat-icon> Obras Sociales</a>
-            <a routerLink="/gestion-medica/planes-cobertura" routerLinkActive="active" class="submenu-item"><mat-icon>assignment</mat-icon> Planes Cobertura</a>
-            <a routerLink="/gestion-medica/farmacias-os" routerLinkActive="active" class="submenu-item"><mat-icon>store</mat-icon> Farmacias OS</a>
-            <a routerLink="/gestion-medica/plan-monodrogas" routerLinkActive="active" class="submenu-item"><mat-icon>medication</mat-icon> Monodrogas</a>
-            <a routerLink="/gestion-medica/laboratorios" routerLinkActive="active" class="submenu-item"><mat-icon>science</mat-icon> Laboratorios</a>
           </div>
         </mat-expansion-panel>
       </nav>
