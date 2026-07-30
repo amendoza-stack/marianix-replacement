@@ -101,6 +101,13 @@ import { MatExpansionModule } from '@angular/material/expansion';
             <a routerLink="/medicamentos/maestro" routerLinkActive="active" class="submenu-item"><mat-icon>list_alt</mat-icon> Maestro de Medicamentos</a>
           </div>
         </mat-expansion-panel>
+
+        <!-- BONIFICACIONES (NUEVO MENÚ DIRECTO) -->
+        <a routerLink="/bonificaciones" routerLinkActive="active" class="menu-item single-item">
+          <mat-icon class="icon-pink">loyalty</mat-icon>
+          <span>Bonificaciones</span>
+        </a>
+
       </nav>
     </aside>
   `,
@@ -137,6 +144,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
     .icon-cyan { color: #22D3EE !important; }
     .icon-green { color: #4ADE80 !important; }
     .icon-purple { color: #C084FC !important; }
+    .icon-pink { color: #F472B6 !important; }
   `]
 })
 export class SidebarComponent {}

@@ -1,0 +1,147 @@
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, of, throwError } from 'rxjs';
+import { delay } from 'rxjs/operators';
+import { 
+  BonificacionInterface, 
+  BonificacionConsultaRecetaRequestDto, 
+  BonificacionConsultaRecetaResponseDto 
+} from '../models/bonificacion.model';
+
+@Injectable({ providedIn: 'root' })
+export class BonificacionesService {
+  private http = inject(HttpClient);
+  private readonly baseUrl = '/api/v1/bonificaciones';
+
+  private list: BonificacionInterface[] = [
+    {
+      id: 1,
+      codigo: 'BON-001',
+      descripcion: 'BONIFICACIÓN PADRÓN GENERAL OSDE PLAN 210',
+      categoriaId: 1, categoriaNombre: 'MEDICAMENTOS AMBULATORIOS',
+      obraSocialId: 1, obraSocialNombre: 'OSDE ORGANIZACIÓN DE SERVICIOS DIRECTOS EMPRESARIOS',
+      planId: 1, planNombre: 'PLAN 210',
+      ubicacionId: 1, ubicacionNombre: 'CENTRO METROPOLITANO',
+      farmaciaId: 1, farmaciaCodigo: 'FAR-001', farmaciaNombre: 'FARMACIA CENTRAL BUENOS AIRES',
+      valor1: 15.5,
+      valor2: 5.0,
+      activo: true,
+      fechaAlta: '2026-02-10',
+      usuarioAlta: 'ADMIN_SISTEMA'
+    },
+    {
+      id: 2,
+      codigo: 'BON-002',
+      descripcion: 'DESCUENTO ESPECIAL SWISS MEDICAL CORDOBA',
+      categoriaId: 2, categoriaNombre: 'ALTA COMPLEXIDAD / ONCOLÓGICOS',
+      obraSocialId: 2, obraSocialNombre: 'SWISS MEDICAL S.A.',
+      planId: 3, planNombre: 'PLAN SMG20',
+      ubicacionId: 2, ubicacionNombre: 'SUCURSAL CÓRDOBA',
+      farmaciaId: 2, farmaciaCodigo: 'FAR-002', farmaciaNombre: 'FARMACIA DEL SOL',
+      valor1: 20.0,
+      valor2: 10.0,
+      activo: true,
+      fechaAlta: '2026-02-18',
+      usuarioAlta: 'AUDITOR_MEDICO'
+    }
+  ];
+
+  getAll(): Observable<BonificacionInterface[]> {
+    return of(JSON.parse(JSON.stringify(this.list.filter(x => x.activo !== false)))).pipe(delay(200));
+  }
+
+  getById(id: number): Observable<BonificacionInterface | undefined> {
+    const item = this.list.find(x => x.id === id);
+    return of(item ? JSON.parse(JSON.stringify(item)) : undefined).pipe(delay(200));
+  }
+
+  save(item: BonificacionInterface): Observable<BonificacionInterface> {
+    const dup = this.list.find(x =>
+      x.categoriaId === item.categoriaId &&
+      x.obraSocialId === item.obraSocialId &&
+      x.planId === item.planId &&
+      x.ubicacionId === item.ubicacionId &&
+      x.farmaciaId === item.farmaciaId &&
+      x.id !== item.id &&
+      x.activo !== false
+    );
+
+    if (dup) {
+      return throwError(() => new Error('Ya existe una Bonificación configurada para esta combinación.'));
+    }
+
+    const fechaActual = new Date().toISOString().split('T')[0];
+    const usuarioActual = 'ADMIN_SISTEMA';
+
+    if (item.id) {
+      const idx = this.list.findIndex(x => x.id === item.id);
+      if (idx !== -1) {
+        this.list[idx] = { ...this.list[idx], ...item };
+        return of(this.list[idx]).pipe(delay(200));
+      }
+    }
+
+    const newItem: BonificacionInterface = {
+      ...item,
+      id: Date.now(),
+      codigo: 'BON-' + String(this.list.length + 1).padStart(3, '0'),
+      fechaAlta: fechaActual,
+      usuarioAlta: usuarioActual,
+      activo: true
+    };
+    this.list.unshift(newItem);
+    return of(newItem).pipe(delay(200));
+  }
+
+  deleteLogico(id: number): Observable<boolean> {
+    const idx = this.list.findIndex(x => x.id === id);
+    if (idx !== -1) {
+      this.list[idx].activo = false;
+      return of(true).pipe(delay(200));
+    }
+    return of(false);
+  }
+
+  // MÉTODO EXPUESTO PARA INTEGRACIÓN FUTURA CON EL MÓDULO DE RECETAS
+  obtenerBonificacionParaReceta(req: BonificacionConsultaRecetaRequestDto): Observable<BonificacionConsultaRecetaResponseDto> {
+    const match = this.list.find(x =>
+      x.categoriaId === req.categoriaId &&
+      x.obraSocialId === req.obraSocialId &&
+      x.planId === req.planId &&
+      x.ubicacionId === req.ubicacionId &&
+      x.farmaciaId === req.farmaciaId &&
+      x.activo === true
+    );
+
+    if (match) {
+      return of({
+        encontrado: true,
+        valor1: match.valor1,
+        valor2: match.valor2,
+        bonificacionId: match.id,
+        mensaje: 'Bonificación encontrada exitosamente'
+      });
+    }
+
+    return of({
+      encontrado: false,
+      valor1: 0,
+      valor2: 0,
+      mensaje: 'No se encontró configuración de bonificación para esta combinación'
+    });
+  }
+
+  exportarExcel(data: BonificacionInterface[]): void {
+    let csvContent = 'data:text/csv;charset=utf-8,Codigo;Descripcion;Categoria;Obra Social;Plan;Ubicacion;Codigo Farmacia;Nombre Farmacia;Estado;Valor 1;Valor 2\n';
+    data.forEach(row => {
+      csvContent += `"${row.codigo}";"${row.descripcion}";"${row.categoriaNombre}";"${row.obraSocialNombre}";"${row.planNombre}";"${row.ubicacionNombre}";"${row.farmaciaCodigo}";"${row.farmaciaNombre}";"${row.activo ? 'Activo' : 'Inactivo'}";${row.valor1};${row.valor2}\n`;
+    });
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `Bonificaciones_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+}

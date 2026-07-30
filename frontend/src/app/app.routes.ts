@@ -47,7 +47,10 @@ export const routes: Routes = [
       { path: 'medicamentos/vias', loadComponent: () => import('./modules/medicamentos/maestro-medicamentos/pages/medicamentos-pages').then(m => m.ViasAdministracionPageComponent) },
       { path: 'medicamentos/acciones', loadComponent: () => import('./modules/medicamentos/maestro-medicamentos/pages/medicamentos-pages').then(m => m.AccionesTerapeurticasPageComponent) },
       { path: 'medicamentos/importacion', loadComponent: () => import('./modules/medicamentos/importacion-novedades/pages/importacion-novedades-page.component').then(m => m.ImportacionNovedadesPageComponent) },
-      { path: 'medicamentos/maestro', loadComponent: () => import('./modules/medicamentos/maestro-medicamentos/pages/medicamentos-pages').then(m => m.MaestroMedicamentosPageComponent) }
+      { path: 'medicamentos/maestro', loadComponent: () => import('./modules/medicamentos/maestro-medicamentos/pages/medicamentos-pages').then(m => m.MaestroMedicamentosPageComponent) },
+
+      // BONIFICACIONES
+      { path: 'bonificaciones', loadComponent: () => import('./modules/bonificaciones/pages/bonificaciones-page.component').then(m => m.BonificacionesPageComponent) }
     ]
   },
 
