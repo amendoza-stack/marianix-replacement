@@ -35,9 +35,14 @@ export const routes: Routes = [
       { path: 'gestion-medica/afiliados', loadComponent: () => import('./modules/gestion-medica/afiliados/pages/afiliados-page.component').then(m => m.AfiliadosPageComponent) },
       { path: 'gestion-medica/medicos', loadComponent: () => import('./modules/gestion-medica/medicos/pages/medicos-page.component').then(m => m.MedicosPageComponent) },
 
-      // GESTIÓN DE SALUD (NUEVO GRUPO)
+      // GESTIÓN DE SALUD
       { path: 'gestion-salud/obras-sociales', loadComponent: () => import('./modules/gestion-salud/obras-sociales/pages/obras-sociales-page.component').then(m => m.ObrasSocialesPageComponent) },
-      { path: 'gestion-salud/laboratorios', loadComponent: () => import('./modules/gestion-salud/laboratorios/pages/laboratorios-page.component').then(m => m.LaboratoriosPageComponent) }
+      { path: 'gestion-salud/laboratorios', loadComponent: () => import('./modules/gestion-salud/laboratorios/pages/laboratorios-page.component').then(m => m.LaboratoriosPageComponent) },
+
+      // MEDICAMENTOS (NUEVAS RUTAS)
+      { path: 'medicamentos/drogas', loadComponent: () => import('./modules/medicamentos/maestro-medicamentos/pages/medicamentos-pages').then(m => m.DrogasPageComponent) },
+      { path: 'medicamentos/monodrogas', loadComponent: () => import('./modules/medicamentos/maestro-medicamentos/pages/medicamentos-pages').then(m => m.MonodrogasPageComponent) },
+      { path: 'medicamentos/maestro', loadComponent: () => import('./modules/medicamentos/maestro-medicamentos/pages/medicamentos-pages').then(m => m.MaestroMedicamentosPageComponent) }
     ]
   },
 

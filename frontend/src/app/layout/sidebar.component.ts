@@ -66,7 +66,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
           </div>
         </mat-expansion-panel>
 
-        <!-- GESTIÓN DE SALUD (NUEVO GRUPO) -->
+        <!-- GESTIÓN DE SALUD -->
         <mat-expansion-panel class="menu-panel" [expanded]="false">
           <mat-expansion-panel-header class="menu-header">
             <mat-panel-title>
@@ -78,6 +78,22 @@ import { MatExpansionModule } from '@angular/material/expansion';
           <div class="submenu-list">
             <a routerLink="/gestion-salud/obras-sociales" routerLinkActive="active" class="submenu-item"><mat-icon>local_hospital</mat-icon> Obras Sociales</a>
             <a routerLink="/gestion-salud/laboratorios" routerLinkActive="active" class="submenu-item"><mat-icon>science</mat-icon> Laboratorios</a>
+          </div>
+        </mat-expansion-panel>
+
+        <!-- MEDICAMENTOS (NUEVO MENÚ) -->
+        <mat-expansion-panel class="menu-panel" [expanded]="false">
+          <mat-expansion-panel-header class="menu-header">
+            <mat-panel-title>
+              <mat-icon class="icon-purple">medication_liquid</mat-icon>
+              <span>Medicamentos</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <div class="submenu-list">
+            <a routerLink="/medicamentos/drogas" routerLinkActive="active" class="submenu-item"><mat-icon>medication</mat-icon> Drogas</a>
+            <a routerLink="/medicamentos/monodrogas" routerLinkActive="active" class="submenu-item"><mat-icon>science</mat-icon> Monodrogas</a>
+            <a routerLink="/medicamentos/maestro" routerLinkActive="active" class="submenu-item"><mat-icon>list_alt</mat-icon> Maestro de Medicamentos</a>
           </div>
         </mat-expansion-panel>
       </nav>
@@ -115,6 +131,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
     .icon-orange { color: #FB923C !important; }
     .icon-cyan { color: #22D3EE !important; }
     .icon-green { color: #4ADE80 !important; }
+    .icon-purple { color: #C084FC !important; }
   `]
 })
 export class SidebarComponent {}
