@@ -24,8 +24,8 @@ import { MatExpansionModule } from '@angular/material/expansion';
           <span>Inicio / Dashboard</span>
         </a>
 
-        <!-- CONFIGURACIÓN / ABMS -->
-        <mat-expansion-panel class="menu-panel" [expanded]="true">
+        <!-- CONFIGURACIÓN / ABMS (INICIA COMPRIMIDO) -->
+        <mat-expansion-panel class="menu-panel" [expanded]="false">
           <mat-expansion-panel-header class="menu-header">
             <mat-panel-title>
               <mat-icon class="icon-orange">settings</mat-icon>
@@ -51,8 +51,8 @@ import { MatExpansionModule } from '@angular/material/expansion';
           </div>
         </mat-expansion-panel>
 
-        <!-- GESTIÓN MÉDICA (ÚNICAMENTE AFILIADOS Y MÉDICOS) -->
-        <mat-expansion-panel class="menu-panel" [expanded]="true">
+        <!-- GESTIÓN MÉDICA (INICIA COMPRIMIDO) -->
+        <mat-expansion-panel class="menu-panel" [expanded]="false">
           <mat-expansion-panel-header class="menu-header">
             <mat-panel-title>
               <mat-icon class="icon-cyan">medical_services</mat-icon>
