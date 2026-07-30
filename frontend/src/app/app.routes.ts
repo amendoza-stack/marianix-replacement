@@ -45,6 +45,7 @@ export const routes: Routes = [
       { path: 'medicamentos/potencias', loadComponent: () => import('./modules/medicamentos/maestro-medicamentos/pages/medicamentos-pages').then(m => m.PotenciasPageComponent) },
       { path: 'medicamentos/vias', loadComponent: () => import('./modules/medicamentos/maestro-medicamentos/pages/medicamentos-pages').then(m => m.ViasAdministracionPageComponent) },
       { path: 'medicamentos/acciones', loadComponent: () => import('./modules/medicamentos/maestro-medicamentos/pages/medicamentos-pages').then(m => m.AccionesTerapeurticasPageComponent) },
+      { path: 'medicamentos/importacion', loadComponent: () => import('./modules/medicamentos/importacion-novedades/pages/importacion-novedades-page.component').then(m => m.ImportacionNovedadesPageComponent) },
       { path: 'medicamentos/maestro', loadComponent: () => import('./modules/medicamentos/maestro-medicamentos/pages/medicamentos-pages').then(m => m.MaestroMedicamentosPageComponent) }
     ]
   },
