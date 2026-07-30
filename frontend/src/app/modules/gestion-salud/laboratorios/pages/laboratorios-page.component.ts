@@ -6,15 +6,16 @@ import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { ObrasSocialesService } from '../obras-sociales/services/gestion-salud.service';
-import { LaboratorioInterface } from '../obras-sociales/models/gestion-salud.model';
+import { MatIconModule } from '@angular/material/icon';
+import { ObrasSocialesService } from '../../obras-sociales/services/gestion-salud.service';
+import { LaboratorioInterface } from '../../obras-sociales/models/gestion-salud.model';
 
 @Component({
   selector: 'app-laboratorios-page',
   standalone: true,
   imports: [
     CommonModule, FormsModule, MatTableModule, MatPaginatorModule,
-    MatSortModule, MatInputModule, MatFormFieldModule
+    MatSortModule, MatInputModule, MatFormFieldModule, MatIconModule
   ],
   template: `
     <div class="page-container notranslate" translate="no">
@@ -95,7 +96,7 @@ export class LaboratoriosPageComponent implements OnInit {
   @ViewChild(MatSort) sort!: MatSort;
 
   ngOnInit(): void {
-    this.service.getLaboratorios().subscribe(res => {
+    this.service.getLaboratorios().subscribe((res: LaboratorioInterface[]) => {
       this.dataSource.data = res;
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
