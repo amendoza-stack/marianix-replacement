@@ -199,9 +199,9 @@ export class BonificacionFormDialogComponent implements OnInit {
   cargarTablasAuxiliares() {
     // 1. Cargar Categorías desde Tablas Auxiliares
     this.categoriasList = [
-      { id: 1, nombre: 'MEDICAMENTOS AMBULATORIOS' },
-      { id: 2, nombre: 'ALTA COMPLEXIDAD / ONCOLÓGICOS' },
-      { id: 3, nombre: 'VACUNAS Y BIOLÓGICOS' }
+      { id: 1, nombre: 'ÉTICO (E)' },
+      { id: 2, nombre: 'GENÉRICO (G)' },
+      { id: 3, nombre: 'HOSPITALARIO (H)' }
     ];
 
     // 2. Cargar Ubicaciones desde Tablas Auxiliares
