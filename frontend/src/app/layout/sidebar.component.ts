@@ -94,6 +94,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
             <a routerLink="/medicamentos/drogas" routerLinkActive="active" class="submenu-item"><mat-icon>medication</mat-icon> Drogas</a>
             <a routerLink="/medicamentos/monodrogas" routerLinkActive="active" class="submenu-item"><mat-icon>science</mat-icon> Monodrogas</a>
             <a routerLink="/medicamentos/potencias" routerLinkActive="active" class="submenu-item"><mat-icon>speed</mat-icon> Potencias</a>
+            <a routerLink="/medicamentos/vias" routerLinkActive="active" class="submenu-item"><mat-icon>route</mat-icon> Vías de Administración</a>
             <a routerLink="/medicamentos/maestro" routerLinkActive="active" class="submenu-item"><mat-icon>list_alt</mat-icon> Maestro de Medicamentos</a>
           </div>
         </mat-expansion-panel>

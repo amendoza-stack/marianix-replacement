@@ -9,9 +9,9 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { DrogasService, MonodrogasService, PotenciasService, MedicamentosMasterService } from '../services/medicamentos.service';
+import { DrogasService, MonodrogasService, PotenciasService, ViasAdministracionService, MedicamentosMasterService } from '../services/medicamentos.service';
 import { MedicamentosValidators } from '../validators/medicamentos.validators';
-import { PotenciaInterface } from '../models/medicamentos-master.model';
+import { PotenciaInterface, ViaAdministracionInterface } from '../models/medicamentos-master.model';
 
 // 1. DIÁLOGO DROGAS
 @Component({
@@ -163,7 +163,7 @@ export class MonodrogaFormDialogComponent implements OnInit {
   }
 }
 
-// 3. DIÁLOGO POTENCIAS (NUEVO ABM FASE 4)
+// 3. DIÁLOGO POTENCIAS
 @Component({
   selector: 'app-potencia-form-dialog',
   standalone: true,
@@ -251,7 +251,88 @@ export class PotenciaFormDialogComponent implements OnInit {
   }
 }
 
-// 4. DIÁLOGO MEDICAMENTO CON INTEGRACIÓN DE POTENCIAS
+// 4. DIÁLOGO VÍAS DE ADMINISTRACIÓN (NUEVO ABM FASE 5)
+@Component({
+  selector: 'app-via-administracion-form-dialog',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatIconModule],
+  template: `
+    <div class="dialog-box notranslate" translate="no">
+      <h2 mat-dialog-title class="dialog-title">
+        <mat-icon color="primary">route</mat-icon>
+        {{ data ? 'Editar Vía de Administración' : 'Nueva Vía de Administración' }}
+      </h2>
+
+      <mat-dialog-content class="dialog-content">
+        <form [formGroup]="form" class="form-vertical">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Código (No Modificable)</mat-label>
+            <input matInput formControlName="codigo" readonly class="code-input">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Descripción *</mat-label>
+            <input matInput formControlName="descripcion" placeholder="Ej: ORAL, INTRAVENOSA">
+            <mat-error *ngIf="form.get('descripcion')?.hasError('required')">Campo obligatorio</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Estado *</mat-label>
+            <mat-select formControlName="activo">
+              <mat-option [value]="true">Activo</mat-option>
+              <mat-option [value]="false">Inactivo</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </form>
+      </mat-dialog-content>
+
+      <mat-dialog-actions align="end" class="dialog-actions">
+        <button mat-button mat-dialog-close>Cancelar</button>
+        <button mat-flat-button color="primary" class="btn-save" [disabled]="form.invalid" (click)="onSave()">Guardar</button>
+      </mat-dialog-actions>
+    </div>
+  `,
+  styles: [`
+    .dialog-box { width: 100%; box-sizing: border-box; }
+    .dialog-title { display: flex; align-items: center; gap: 8px; font-weight: 800; color: var(--text-main); margin: 0 0 8px 0; }
+    .dialog-content { padding: 8px 16px 16px 16px !important; overflow-x: hidden; }
+    .form-vertical { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+    .full-width { width: 100%; }
+    .code-input { font-weight: 800; color: #0284C7 !important; background: #F0F9FF !important; }
+    .dialog-actions { padding: 12px 16px !important; border-top: 1px solid var(--border-color); }
+    .btn-save { font-weight: 700; height: 40px; padding: 0 20px; background-color: var(--brand-primary) !important; }
+  `]
+})
+export class ViaAdministracionFormDialogComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private ref = inject(MatDialogRef<ViaAdministracionFormDialogComponent>);
+  private service = inject(ViasAdministracionService);
+  public data: any = inject(MAT_DIALOG_DATA);
+
+  form = this.fb.group({
+    id: [null],
+    codigo: [{ value: '', disabled: true }],
+    descripcion: ['', [Validators.required, MedicamentosValidators.descripcionUppercase()]],
+    activo: [true, Validators.required]
+  });
+
+  ngOnInit() {
+    if (this.data) {
+      this.form.patchValue(this.data);
+      if (this.data.codigo) this.form.get('codigo')?.setValue(this.data.codigo);
+    } else {
+      this.form.get('codigo')?.setValue('VIA-013');
+    }
+  }
+
+  onSave() {
+    if (this.form.valid) {
+      this.service.save(this.form.getRawValue() as any).subscribe((res: any) => this.ref.close(res), (err: any) => alert(err.message));
+    }
+  }
+}
+
+// 5. DIÁLOGO MEDICAMENTO CON INTEGRACIÓN DE VÍAS DE ADMINISTRACIÓN
 @Component({
   selector: 'app-medicamento-form-dialog',
   standalone: true,
@@ -288,9 +369,16 @@ export class PotenciaFormDialogComponent implements OnInit {
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="col-third">
-            <mat-label>Potencia (Unidad) *</mat-label>
+            <mat-label>Potencia *</mat-label>
             <mat-select formControlName="potenciaId">
               <mat-option *ngFor="let p of potenciasList" [value]="p.id">{{ p.descripcion }} ({{ p.abreviatura }})</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="col-third">
+            <mat-label>Vía de Administración *</mat-label>
+            <mat-select formControlName="viaAdministracionId">
+              <mat-option *ngFor="let v of viasList" [value]="v.id">{{ v.descripcion }}</mat-option>
             </mat-select>
           </mat-form-field>
 
@@ -311,12 +399,12 @@ export class PotenciaFormDialogComponent implements OnInit {
             <mat-datepicker #picker></mat-datepicker>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="col-half">
+          <mat-form-field appearance="outline" class="col-third">
             <mat-label>Forma Farmacéutica</mat-label>
             <input matInput formControlName="formaFarmaceutica" placeholder="COMPRIMIDO">
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="col-half">
+          <mat-form-field appearance="outline" class="col-full">
             <mat-label>Multidroga</mat-label>
             <mat-select formControlName="multidroga">
               <mat-option value="No">No</mat-option>
@@ -349,9 +437,11 @@ export class MedicamentoFormDialogComponent implements OnInit {
   private ref = inject(MatDialogRef<MedicamentoFormDialogComponent>);
   private service = inject(MedicamentosMasterService);
   private potenciasService = inject(PotenciasService);
+  private viasService = inject(ViasAdministracionService);
   public data: any = inject(MAT_DIALOG_DATA);
 
   potenciasList: PotenciaInterface[] = [];
+  viasList: ViaAdministracionInterface[] = [];
 
   form = this.fb.group({
     id: [null],
@@ -366,8 +456,9 @@ export class MedicamentoFormDialogComponent implements OnInit {
     monodrogaId: [1, Validators.required],
     potenciaId: [1, Validators.required],
     potencia: ['500 MG'],
-    formaFarmaceutica: ['COMPRIMIDO'],
+    viaAdministracionId: [1, Validators.required],
     viaAdministracion: ['ORAL'],
+    formaFarmaceutica: ['COMPRIMIDO'],
     contenido: ['30 UNIDADES'],
     accion: ['TERAPÉUTICA'],
     multidroga: ['No'],
@@ -376,6 +467,7 @@ export class MedicamentoFormDialogComponent implements OnInit {
 
   ngOnInit() {
     this.potenciasService.getAll().subscribe((res: PotenciaInterface[]) => this.potenciasList = res);
+    this.viasService.getAll().subscribe((res: ViaAdministracionInterface[]) => this.viasList = res);
     if (this.data) this.form.patchValue(this.data);
   }
 

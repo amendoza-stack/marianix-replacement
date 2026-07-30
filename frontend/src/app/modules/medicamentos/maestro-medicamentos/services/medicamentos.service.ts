@@ -1,7 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
-import { DrogaInterface, MonodrogaInterface, PotenciaInterface, MaestroMedicamentoInterface } from '../models/medicamentos-master.model';
+import { DrogaInterface, MonodrogaInterface, PotenciaInterface, ViaAdministracionInterface, MaestroMedicamentoInterface } from '../models/medicamentos-master.model';
 
 @Injectable({ providedIn: 'root' })
 export class DrogasService {
@@ -135,6 +135,64 @@ export class PotenciasService {
   }
 }
 
+// SERVICIO FASE 5: VÍAS DE ADMINISTRACIÓN
+@Injectable({ providedIn: 'root' })
+export class ViasAdministracionService {
+  private list: ViaAdministracionInterface[] = [
+    { id: 1, codigo: 'VIA-001', descripcion: 'ORAL', activo: true, esProtegido: true },
+    { id: 2, codigo: 'VIA-002', descripcion: 'SUBLINGUAL', activo: true, esProtegido: true },
+    { id: 3, codigo: 'VIA-003', descripcion: 'INTRAMUSCULAR', activo: true, esProtegido: true },
+    { id: 4, codigo: 'VIA-004', descripcion: 'INTRAVENOSA', activo: true, esProtegido: true },
+    { id: 5, codigo: 'VIA-005', descripcion: 'SUBCUTÁNEA', activo: true, esProtegido: true },
+    { id: 6, codigo: 'VIA-006', descripcion: 'TÓPICA', activo: true, esProtegido: true },
+    { id: 7, codigo: 'VIA-007', descripcion: 'OFTÁLMICA', activo: true, esProtegido: true },
+    { id: 8, codigo: 'VIA-008', descripcion: 'ÓTICA', activo: true, esProtegido: true },
+    { id: 9, codigo: 'VIA-009', descripcion: 'RECTAL', activo: true, esProtegido: true },
+    { id: 10, codigo: 'VIA-010', descripcion: 'VAGINAL', activo: true, esProtegido: true },
+    { id: 11, codigo: 'VIA-011', descripcion: 'INHALATORIA', activo: true, esProtegido: true },
+    { id: 12, codigo: 'VIA-012', descripcion: 'NASAL', activo: true, esProtegido: true }
+  ];
+
+  getAll(): Observable<ViaAdministracionInterface[]> {
+    return of(JSON.parse(JSON.stringify(this.list))).pipe(delay(200));
+  }
+
+  save(item: ViaAdministracionInterface): Observable<ViaAdministracionInterface> {
+    item.descripcion = item.descripcion.trim().toUpperCase();
+
+    const dup = this.list.find(x => x.descripcion === item.descripcion && x.id !== item.id);
+    if (dup) return throwError(() => new Error(`La vía de administración '${item.descripcion}' ya existe.`));
+
+    if (item.id) {
+      const idx = this.list.findIndex(x => x.id === item.id);
+      if (idx !== -1) {
+        this.list[idx] = { ...this.list[idx], ...item };
+        return of(this.list[idx]).pipe(delay(200));
+      }
+    }
+    const newItem: ViaAdministracionInterface = {
+      ...item,
+      id: Date.now(),
+      codigo: 'VIA-' + String(this.list.length + 1).padStart(3, '0')
+    };
+    this.list.unshift(newItem);
+    return of(newItem).pipe(delay(200));
+  }
+
+  delete(id: number): Observable<boolean> {
+    const item = this.list.find(x => x.id === id);
+    if (item && item.esProtegido) {
+      return throwError(() => new Error('Este registro está precargado por el sistema y no se permite su eliminación.'));
+    }
+    const idx = this.list.findIndex(x => x.id === id);
+    if (idx !== -1) {
+      this.list.splice(idx, 1);
+      return of(true).pipe(delay(200));
+    }
+    return of(false);
+  }
+}
+
 @Injectable({ providedIn: 'root' })
 export class MedicamentosMasterService {
   private list: MaestroMedicamentoInterface[] = [
@@ -142,14 +200,16 @@ export class MedicamentosMasterService {
       id: 1, codigo: 'MED-001', descripcion: 'ASPIRINNET 500 MG x 30 COMP.', tamano: '30 COMPRIMIDOS',
       laboratorioId: 1, laboratorioNombre: 'LABORATORIOS BAGO S.A.', codOrigenPrecio: 'FAB', codIva: '21%',
       vigenciaFecha: '2026-12-31', codigoBarras: '7791234567890', monodrogaId: 1, monodrogaNombre: 'ÁCIDO ACETILSALICÍLICO 500 MG',
-      potenciaId: 1, potenciaNombre: 'MILIGRAMOS (MG)', potencia: '500 MG', formaFarmaceutica: 'COMPRIMIDO', viaAdministracion: 'ORAL', contenido: '30 UNIDADES',
+      potenciaId: 1, potenciaNombre: 'MILIGRAMOS (MG)', potencia: '500 MG', viaAdministracionId: 1, viaAdministracionNombre: 'ORAL',
+      formaFarmaceutica: 'COMPRIMIDO', viaAdministracion: 'ORAL', contenido: '30 UNIDADES',
       accion: 'ANALGÉSICO / ANTIPIRÉTICO', multidroga: 'No', estado: 'Activo'
     },
     {
       id: 2, codigo: 'MED-002', descripcion: 'IBUPROFENO 400 MG x 20 CÁPS.', tamano: '20 CÁPSULAS',
       laboratorioId: 2, laboratorioNombre: 'ROEMMERS S.A.I.C.F.', codOrigenPrecio: 'FAB', codIva: '21%',
       vigenciaFecha: '2026-10-15', codigoBarras: '7799876543210', monodrogaId: 2, monodrogaNombre: 'IBUPROFENO 400 MG',
-      potenciaId: 1, potenciaNombre: 'MILIGRAMOS (MG)', potencia: '400 MG', formaFarmaceutica: 'CÁPSULA BLANDA', viaAdministracion: 'ORAL', contenido: '20 UNIDADES',
+      potenciaId: 1, potenciaNombre: 'MILIGRAMOS (MG)', potencia: '400 MG', viaAdministracionId: 1, viaAdministracionNombre: 'ORAL',
+      formaFarmaceutica: 'CÁPSULA BLANDA', viaAdministracion: 'ORAL', contenido: '20 UNIDADES',
       accion: 'ANTIINFLAMATORIO', multidroga: 'No', estado: 'Activo'
     }
   ];

@@ -10,8 +10,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { DrogasService, MonodrogasService, PotenciasService, MedicamentosMasterService } from '../services/medicamentos.service';
-import { DrogaFormDialogComponent, MonodrogaFormDialogComponent, PotenciaFormDialogComponent, MedicamentoFormDialogComponent } from '../dialogs/medicamento-form-dialog.component';
+import { DrogasService, MonodrogasService, PotenciasService, ViasAdministracionService, MedicamentosMasterService } from '../services/medicamentos.service';
+import { DrogaFormDialogComponent, MonodrogaFormDialogComponent, PotenciaFormDialogComponent, ViaAdministracionFormDialogComponent, MedicamentoFormDialogComponent } from '../dialogs/medicamento-form-dialog.component';
 
 @Component({
   selector: 'app-drogas-page',
@@ -148,7 +148,6 @@ export class MonodrogasPageComponent implements OnInit {
   }
 }
 
-// NUEVO COMPONENTE: POTENCIAS PAGE (FASE 4)
 @Component({
   selector: 'app-potencias-page',
   standalone: true,
@@ -201,7 +200,7 @@ export class PotenciasPageComponent implements OnInit {
   cols = ['codigo', 'descripcion', 'abreviatura', 'activo', 'acciones'];
   searchTerm = '';
   @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(MatSort) sort!: Sort;
 
   ngOnInit() { this.load(); }
   load() { this.service.getAll().subscribe((res: any[]) => { this.dataSource.data = res; this.dataSource.paginator = this.paginator; this.dataSource.sort = this.sort; }); }
@@ -214,6 +213,74 @@ export class PotenciasPageComponent implements OnInit {
   onDelete(item: any) {
     if (confirm(`¿Eliminar potencia '${item.descripcion}'?`)) {
       this.service.delete(item.id).subscribe(() => { this.snack.open('Potencia eliminada', 'Aceptar', { duration: 2500 }); this.load(); });
+    }
+  }
+}
+
+// NUEVO COMPONENTE: VÍAS DE ADMINISTRACIÓN PAGE (FASE 5)
+@Component({
+  selector: 'app-vias-administracion-page',
+  standalone: true,
+  imports: [CommonModule, FormsModule, MatTableModule, MatPaginatorModule, MatSortModule, MatButtonModule, MatIconModule, MatInputModule, MatFormFieldModule, MatDialogModule, MatSnackBarModule],
+  template: `
+    <div class="page-container notranslate" translate="no">
+      <div class="header-actions">
+        <div><h1>Padrón de Vías de Administración</h1><p class="subtitle">Gestión de rutas de administración de medicamentos</p></div>
+        <button mat-flat-button color="primary" (click)="openForm()"><mat-icon>add</mat-icon> Nueva Vía</button>
+      </div>
+      <div class="card-table">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Buscar vía de administración...</mat-label>
+          <input matInput [(ngModel)]="searchTerm" (keyup)="applyFilter()" placeholder="Código o descripción...">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+        <table mat-table [dataSource]="dataSource" matSort class="full-width-table">
+          <ng-container matColumnDef="codigo"><th mat-header-cell *matHeaderCellDef mat-sort-header>Código</th><td mat-cell *matCellDef="let el" class="font-mono text-blue font-bold">{{el.codigo}}</td></ng-container>
+          <ng-container matColumnDef="descripcion"><th mat-header-cell *matHeaderCellDef mat-sort-header>Descripción</th><td mat-cell *matCellDef="let el"><strong>{{el.descripcion}}</strong></td></ng-container>
+          <ng-container matColumnDef="activo"><th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th><td mat-cell *matCellDef="let el"><span class="badge" [ngClass]="el.activo ? 'badge-active' : 'badge-inactive'">{{el.activo ? 'ACTIVO' : 'INACTIVO'}}</span></td></ng-container>
+          <ng-container matColumnDef="acciones"><th mat-header-cell *matHeaderCellDef class="text-center">Acciones</th><td mat-cell *matCellDef="let el" class="text-center"><button mat-icon-button color="primary" (click)="openForm(el)"><mat-icon>edit</mat-icon></button><button mat-icon-button color="warn" [disabled]="el.esProtegido" (click)="onDelete(el)"><mat-icon>delete</mat-icon></button></td></ng-container>
+          <tr mat-header-row *matHeaderRowDef="cols"></tr><tr mat-row *matRowDef="let row; columns: cols;"></tr>
+        </table>
+        <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+      </div>
+    </div>
+  `,
+  styles: [`
+    .page-container { display: flex; flex-direction: column; gap: 16px; }
+    .header-actions { display: flex; justify-content: space-between; align-items: center; }
+    .card-table { background: var(--bg-card); border-radius: 12px; padding: 20px; border: 1px solid var(--border-color); }
+    .search-field { width: 100%; margin-bottom: 12px; }
+    .full-width-table { width: 100%; background: transparent; }
+    .font-mono { font-family: monospace; }
+    .font-bold { font-weight: 700; }
+    .text-blue { color: var(--brand-accent); }
+    .text-center { text-align: center; }
+    .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+    .badge-active { background: #DCFCE7; color: #15803D; }
+    .badge-inactive { background: #FEE2E2; color: #B91C1C; }
+  `]
+})
+export class ViasAdministracionPageComponent implements OnInit {
+  private service = inject(ViasAdministracionService);
+  private dialog = inject(MatDialog);
+  private snack = inject(MatSnackBar);
+  dataSource = new MatTableDataSource<any>([]);
+  cols = ['codigo', 'descripcion', 'activo', 'acciones'];
+  searchTerm = '';
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+
+  ngOnInit() { this.load(); }
+  load() { this.service.getAll().subscribe((res: any[]) => { this.dataSource.data = res; this.dataSource.paginator = this.paginator; this.dataSource.sort = this.sort; }); }
+  applyFilter() { this.dataSource.filter = this.searchTerm.trim().toLowerCase(); }
+  openForm(item?: any) {
+    this.dialog.open(ViaAdministracionFormDialogComponent, { width: '440px', data: item }).afterClosed().subscribe(res => {
+      if (res) { this.snack.open('Vía de administración guardada', 'Aceptar', { duration: 2500 }); this.load(); }
+    });
+  }
+  onDelete(item: any) {
+    if (confirm(`¿Eliminar vía de administración '${item.descripcion}'?`)) {
+      this.service.delete(item.id).subscribe(() => { this.snack.open('Vía eliminada correctamente', 'Aceptar', { duration: 2500 }); this.load(); }, (err: any) => alert(err.message));
     }
   }
 }
