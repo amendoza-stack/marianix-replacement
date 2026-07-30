@@ -1,0 +1,7 @@
+# Node & Angular
+node_modules/
+dist/
+.angular/
+npm-debug.log*
+.DS_Store
+*.py
