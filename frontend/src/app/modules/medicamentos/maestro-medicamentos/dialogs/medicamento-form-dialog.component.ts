@@ -9,9 +9,9 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { DrogasService, MonodrogasService, PotenciasService, ViasAdministracionService, MedicamentosMasterService } from '../services/medicamentos.service';
+import { DrogasService, MonodrogasService, PotenciasService, ViasAdministracionService, AccionesTerapeurticasService, MedicamentosMasterService } from '../services/medicamentos.service';
 import { MedicamentosValidators } from '../validators/medicamentos.validators';
-import { PotenciaInterface, ViaAdministracionInterface } from '../models/medicamentos-master.model';
+import { PotenciaInterface, ViaAdministracionInterface, AccionTerapeurticaInterface } from '../models/medicamentos-master.model';
 
 // 1. DIÁLOGO DROGAS
 @Component({
@@ -251,7 +251,7 @@ export class PotenciaFormDialogComponent implements OnInit {
   }
 }
 
-// 4. DIÁLOGO VÍAS DE ADMINISTRACIÓN (NUEVO ABM FASE 5)
+// 4. DIÁLOGO VÍAS DE ADMINISTRACIÓN
 @Component({
   selector: 'app-via-administracion-form-dialog',
   standalone: true,
@@ -332,7 +332,88 @@ export class ViaAdministracionFormDialogComponent implements OnInit {
   }
 }
 
-// 5. DIÁLOGO MEDICAMENTO CON INTEGRACIÓN DE VÍAS DE ADMINISTRACIÓN
+// 5. DIÁLOGO ACCIONES TERAPÉUTICAS (NUEVO ABM FASE 6)
+@Component({
+  selector: 'app-accion-terapeutica-form-dialog',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatIconModule],
+  template: `
+    <div class="dialog-box notranslate" translate="no">
+      <h2 mat-dialog-title class="dialog-title">
+        <mat-icon color="primary">health_and_safety</mat-icon>
+        {{ data ? 'Editar Acción Terapéutica' : 'Nueva Acción Terapéutica' }}
+      </h2>
+
+      <mat-dialog-content class="dialog-content">
+        <form [formGroup]="form" class="form-vertical">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Código Sistema (Auto)</mat-label>
+            <input matInput formControlName="codigo" readonly class="code-input">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Descripción / Acción *</mat-label>
+            <input matInput formControlName="descripcion" placeholder="Ej: ANALGÉSICO, ANTIBIÓTICO">
+            <mat-error *ngIf="form.get('descripcion')?.hasError('required')">Campo obligatorio</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Estado *</mat-label>
+            <mat-select formControlName="activo">
+              <mat-option [value]="true">Activo</mat-option>
+              <mat-option [value]="false">Inactivo</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </form>
+      </mat-dialog-content>
+
+      <mat-dialog-actions align="end" class="dialog-actions">
+        <button mat-button mat-dialog-close>Cancelar</button>
+        <button mat-flat-button color="primary" class="btn-save" [disabled]="form.invalid" (click)="onSave()">Guardar</button>
+      </mat-dialog-actions>
+    </div>
+  `,
+  styles: [`
+    .dialog-box { width: 100%; box-sizing: border-box; }
+    .dialog-title { display: flex; align-items: center; gap: 8px; font-weight: 800; color: var(--text-main); margin: 0 0 8px 0; }
+    .dialog-content { padding: 8px 16px 16px 16px !important; overflow-x: hidden; }
+    .form-vertical { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+    .full-width { width: 100%; }
+    .code-input { font-weight: 800; color: #0284C7 !important; background: #F0F9FF !important; }
+    .dialog-actions { padding: 12px 16px !important; border-top: 1px solid var(--border-color); }
+    .btn-save { font-weight: 700; height: 40px; padding: 0 20px; background-color: var(--brand-primary) !important; }
+  `]
+})
+export class AccionTerapeurticaFormDialogComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private ref = inject(MatDialogRef<AccionTerapeurticaFormDialogComponent>);
+  private service = inject(AccionesTerapeurticasService);
+  public data: any = inject(MAT_DIALOG_DATA);
+
+  form = this.fb.group({
+    id: [null],
+    codigo: [{ value: '', disabled: true }],
+    descripcion: ['', [Validators.required, MedicamentosValidators.descripcionUppercase()]],
+    activo: [true, Validators.required]
+  });
+
+  ngOnInit() {
+    if (this.data) {
+      this.form.patchValue(this.data);
+      if (this.data.codigo) this.form.get('codigo')?.setValue(this.data.codigo);
+    } else {
+      this.form.get('codigo')?.setValue('ACT-011');
+    }
+  }
+
+  onSave() {
+    if (this.form.valid) {
+      this.service.save(this.form.getRawValue() as any).subscribe((res: any) => this.ref.close(res), (err: any) => alert(err.message));
+    }
+  }
+}
+
+// 6. DIÁLOGO MEDICAMENTO CON INTEGRACIÓN DE ACCIONES TERAPÉUTICAS
 @Component({
   selector: 'app-medicamento-form-dialog',
   standalone: true,
@@ -383,6 +464,13 @@ export class ViaAdministracionFormDialogComponent implements OnInit {
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="col-third">
+            <mat-label>Acción Terapéutica *</mat-label>
+            <mat-select formControlName="accionTerapeurticaId">
+              <mat-option *ngFor="let a of accionesList" [value]="a.id">{{ a.descripcion }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="col-third">
             <mat-label>Tamaño</mat-label>
             <input matInput formControlName="tamano" placeholder="30 COMPRIMIDOS">
           </mat-form-field>
@@ -399,12 +487,12 @@ export class ViaAdministracionFormDialogComponent implements OnInit {
             <mat-datepicker #picker></mat-datepicker>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="col-third">
+          <mat-form-field appearance="outline" class="col-half">
             <mat-label>Forma Farmacéutica</mat-label>
             <input matInput formControlName="formaFarmaceutica" placeholder="COMPRIMIDO">
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="col-full">
+          <mat-form-field appearance="outline" class="col-half">
             <mat-label>Multidroga</mat-label>
             <mat-select formControlName="multidroga">
               <mat-option value="No">No</mat-option>
@@ -438,10 +526,12 @@ export class MedicamentoFormDialogComponent implements OnInit {
   private service = inject(MedicamentosMasterService);
   private potenciasService = inject(PotenciasService);
   private viasService = inject(ViasAdministracionService);
+  private accionesService = inject(AccionesTerapeurticasService);
   public data: any = inject(MAT_DIALOG_DATA);
 
   potenciasList: PotenciaInterface[] = [];
   viasList: ViaAdministracionInterface[] = [];
+  accionesList: AccionTerapeurticaInterface[] = [];
 
   form = this.fb.group({
     id: [null],
@@ -458,9 +548,10 @@ export class MedicamentoFormDialogComponent implements OnInit {
     potencia: ['500 MG'],
     viaAdministracionId: [1, Validators.required],
     viaAdministracion: ['ORAL'],
+    accionTerapeurticaId: [1, Validators.required],
+    accion: ['ANALGÉSICO'],
     formaFarmaceutica: ['COMPRIMIDO'],
     contenido: ['30 UNIDADES'],
-    accion: ['TERAPÉUTICA'],
     multidroga: ['No'],
     estado: ['Activo']
   });
@@ -468,6 +559,7 @@ export class MedicamentoFormDialogComponent implements OnInit {
   ngOnInit() {
     this.potenciasService.getAll().subscribe((res: PotenciaInterface[]) => this.potenciasList = res);
     this.viasService.getAll().subscribe((res: ViaAdministracionInterface[]) => this.viasList = res);
+    this.accionesService.getAll().subscribe((res: AccionTerapeurticaInterface[]) => this.accionesList = res);
     if (this.data) this.form.patchValue(this.data);
   }
 

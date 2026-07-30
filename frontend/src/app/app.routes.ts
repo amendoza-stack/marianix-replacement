@@ -44,6 +44,7 @@ export const routes: Routes = [
       { path: 'medicamentos/monodrogas', loadComponent: () => import('./modules/medicamentos/maestro-medicamentos/pages/medicamentos-pages').then(m => m.MonodrogasPageComponent) },
       { path: 'medicamentos/potencias', loadComponent: () => import('./modules/medicamentos/maestro-medicamentos/pages/medicamentos-pages').then(m => m.PotenciasPageComponent) },
       { path: 'medicamentos/vias', loadComponent: () => import('./modules/medicamentos/maestro-medicamentos/pages/medicamentos-pages').then(m => m.ViasAdministracionPageComponent) },
+      { path: 'medicamentos/acciones', loadComponent: () => import('./modules/medicamentos/maestro-medicamentos/pages/medicamentos-pages').then(m => m.AccionesTerapeurticasPageComponent) },
       { path: 'medicamentos/maestro', loadComponent: () => import('./modules/medicamentos/maestro-medicamentos/pages/medicamentos-pages').then(m => m.MaestroMedicamentosPageComponent) }
     ]
   },

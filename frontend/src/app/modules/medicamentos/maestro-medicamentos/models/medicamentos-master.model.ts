@@ -29,6 +29,13 @@ export interface ViaAdministracionInterface {
   esProtegido?: boolean;
 }
 
+export interface AccionTerapeurticaInterface {
+  id: number;
+  codigo: string;
+  descripcion: string;
+  activo: boolean;
+}
+
 export interface MaestroMedicamentoInterface {
   id: number;
   codigo: string;
@@ -47,6 +54,8 @@ export interface MaestroMedicamentoInterface {
   potencia: string;
   viaAdministracionId?: number;
   viaAdministracionNombre?: string;
+  accionTerapeurticaId?: number;
+  accionTerapeurticaNombre?: string;
   formaFarmaceutica: string;
   viaAdministracion: string;
   contenido: string;
