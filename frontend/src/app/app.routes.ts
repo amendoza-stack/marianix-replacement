@@ -13,11 +13,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: 'dashboard', loadComponent: () => import('./modules/dashboard/dashboard.component').then(m => m.DashboardComponent) },
+      
+      // CONFIGURACIÓN / ABMS
       { path: 'configuracion/usuarios', loadComponent: () => import('./modules/configuracion/usuarios/components/usuarios-page-list.component').then(m => m.UsuariosPageListComponent) },
       { path: 'configuracion/roles', loadComponent: () => import('./modules/configuracion/roles/components/roles-page-list.component').then(m => m.RolesPageListComponent) },
       { path: 'configuracion/permisos', redirectTo: 'configuracion/roles', pathMatch: 'full' },
-
-      // TABLAS AUXILIARES
       { path: 'configuracion/paises', loadComponent: () => import('./modules/configuracion/tablas-auxiliares/pages/paises-page.component').then(m => m.PaisesPageComponent) },
       { path: 'configuracion/provincias', loadComponent: () => import('./modules/configuracion/tablas-auxiliares/pages/provincias-page.component').then(m => m.ProvinciasPageComponent) },
       { path: 'configuracion/ubicaciones', loadComponent: () => import('./modules/configuracion/tablas-auxiliares/pages/ubicaciones-page.component').then(m => m.UbicacionesPageComponent) },
@@ -33,7 +33,11 @@ export const routes: Routes = [
 
       // GESTIÓN MÉDICA
       { path: 'gestion-medica/afiliados', loadComponent: () => import('./modules/gestion-medica/afiliados/pages/afiliados-page.component').then(m => m.AfiliadosPageComponent) },
-      { path: 'gestion-medica/medicos', loadComponent: () => import('./modules/gestion-medica/medicos/pages/medicos-page.component').then(m => m.MedicosPageComponent) }
+      { path: 'gestion-medica/medicos', loadComponent: () => import('./modules/gestion-medica/medicos/pages/medicos-page.component').then(m => m.MedicosPageComponent) },
+
+      // GESTIÓN DE SALUD (NUEVO GRUPO)
+      { path: 'gestion-salud/obras-sociales', loadComponent: () => import('./modules/gestion-salud/obras-sociales/pages/obras-sociales-page.component').then(m => m.ObrasSocialesPageComponent) },
+      { path: 'gestion-salud/laboratorios', loadComponent: () => import('./modules/gestion-salud/laboratorios/pages/laboratorios-page.component').then(m => m.LaboratoriosPageComponent) }
     ]
   },
 

@@ -24,7 +24,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
           <span>Inicio / Dashboard</span>
         </a>
 
-        <!-- CONFIGURACIÓN / ABMS (INICIA COMPRIMIDO) -->
+        <!-- CONFIGURACIÓN / ABMS -->
         <mat-expansion-panel class="menu-panel" [expanded]="false">
           <mat-expansion-panel-header class="menu-header">
             <mat-panel-title>
@@ -51,7 +51,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
           </div>
         </mat-expansion-panel>
 
-        <!-- GESTIÓN MÉDICA (INICIA COMPRIMIDO) -->
+        <!-- GESTIÓN MÉDICA -->
         <mat-expansion-panel class="menu-panel" [expanded]="false">
           <mat-expansion-panel-header class="menu-header">
             <mat-panel-title>
@@ -63,6 +63,21 @@ import { MatExpansionModule } from '@angular/material/expansion';
           <div class="submenu-list">
             <a routerLink="/gestion-medica/afiliados" routerLinkActive="active" class="submenu-item"><mat-icon>people</mat-icon> Afiliados</a>
             <a routerLink="/gestion-medica/medicos" routerLinkActive="active" class="submenu-item"><mat-icon>health_and_safety</mat-icon> Médicos</a>
+          </div>
+        </mat-expansion-panel>
+
+        <!-- GESTIÓN DE SALUD (NUEVO GRUPO) -->
+        <mat-expansion-panel class="menu-panel" [expanded]="false">
+          <mat-expansion-panel-header class="menu-header">
+            <mat-panel-title>
+              <mat-icon class="icon-green">health_and_safety</mat-icon>
+              <span>Gestión de Salud</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <div class="submenu-list">
+            <a routerLink="/gestion-salud/obras-sociales" routerLinkActive="active" class="submenu-item"><mat-icon>local_hospital</mat-icon> Obras Sociales</a>
+            <a routerLink="/gestion-salud/laboratorios" routerLinkActive="active" class="submenu-item"><mat-icon>science</mat-icon> Laboratorios</a>
           </div>
         </mat-expansion-panel>
       </nav>
@@ -99,6 +114,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
     .icon-blue { color: #38BDF8 !important; }
     .icon-orange { color: #FB923C !important; }
     .icon-cyan { color: #22D3EE !important; }
+    .icon-green { color: #4ADE80 !important; }
   `]
 })
 export class SidebarComponent {}
