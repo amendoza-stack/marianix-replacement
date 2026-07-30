@@ -35,18 +35,20 @@ export interface FarmaciaInterface {
   activo: boolean;
 }
 
-export interface FarmaciaConvenioObraSocialInterface {
+export interface FarmaciaColegioInterface {
   id?: number;
-  obraSocialId: number;
   farmaciaId: number;
   farmaciaCodigo?: string;
-  farmaciaDescripcion?: string;
+  farmaciaNombre?: string;
   farmaciaCuit?: string;
   farmaciaCuf?: string;
-  codigoConvenioInterno?: string;
-  bonificacionAcordada?: number;
-  fechaInicioConvenio?: string;
-  fechaFinConvenio?: string;
-  estadoConvenio: 'Activo' | 'Suspendido' | 'Inactivo';
-  observacionesConvenio?: string;
+  colegioFarmaceuticoId: number;
+  colegioCodigo?: string;
+  colegioFarmaceuticoNombre?: string;
+  estado: 'Activo' | 'Inactivo';
+  fechaAlta?: string;
+  usuarioAlta?: string;
+  fechaModificacion?: string;
+  usuarioModificacion?: string;
+  activo?: boolean;
 }
