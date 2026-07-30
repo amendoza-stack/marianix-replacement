@@ -1,7 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
-import { DrogaInterface, MonodrogaInterface, MaestroMedicamentoInterface } from '../maestro-medicamentos/models/medicamentos-master.model';
+import { DrogaInterface, MonodrogaInterface, MaestroMedicamentoInterface } from '../models/medicamentos-master.model';
 
 @Injectable({ providedIn: 'root' })
 export class DrogasService {
