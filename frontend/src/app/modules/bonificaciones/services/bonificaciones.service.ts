@@ -21,10 +21,10 @@ export class BonificacionesService {
       categoriaId: 1, categoriaNombre: 'ÉTICO (E)',
       obraSocialId: 1, obraSocialNombre: 'OSDE ORGANIZACIÓN DE SERVICIOS DIRECTOS EMPRESARIOS',
       planId: 1, planNombre: 'PLAN 210',
-      ubicacionId: 1, ubicacionNombre: 'CENTRO METROPOLITANO',
-      farmaciaId: 1, farmaciaOsConvenioId: 101, codigoFarmaciaOs: '102', farmaciaNombre: 'FARMACIA CENTRAL BUENOS AIRES',
-      valor1: 15.5,
-      valor2: 5.0,
+      ubicacionId: 2, ubicacionNombre: 'SUCURSAL CÓRDOBA',
+      farmaciaId: 1, farmaciaOsConvenioId: 101, codigoFarmaciaOs: '444', farmaciaNombre: 'FARMACIA CENTRAL BUENOS AIRES',
+      valor1: 8.0,
+      valor2: 90.0,
       activo: true,
       fechaAlta: '2026-02-10',
       usuarioAlta: 'ADMIN_SISTEMA'
@@ -37,9 +37,9 @@ export class BonificacionesService {
       obraSocialId: 2, obraSocialNombre: 'SWISS MEDICAL S.A.',
       planId: 3, planNombre: 'PLAN SMG20',
       ubicacionId: 2, ubicacionNombre: 'SUCURSAL CÓRDOBA',
-      farmaciaId: 2, farmaciaOsConvenioId: 102, codigoFarmaciaOs: '205', farmaciaNombre: 'FARMACIA DEL SOL',
-      valor1: 20.0,
-      valor2: 10.0,
+      farmaciaId: 2, farmaciaOsConvenioId: 102, codigoFarmaciaOs: '444', farmaciaNombre: 'FARMACIA DEL SOL',
+      valor1: 22.0,
+      valor2: 90.0,
       activo: true,
       fechaAlta: '2026-02-18',
       usuarioAlta: 'AUDITOR_MEDICO'
@@ -130,14 +130,33 @@ export class BonificacionesService {
     });
   }
 
+  // EXPORTACIÓN CON ESTRUCTURA EXACTA DE LA IMAGEN OFICIAL: PLAN;UBICA;CATEGO;CODFAROS;VALOR1;VALOR2
   exportarExcel(data: BonificacionInterface[]): void {
-    let csvContent = 'data:text/csv;charset=utf-8,Codigo;Descripcion;Categoria;Obra Social;Plan;Ubicacion;CODFAROS;Nombre Farmacia;Estado;Valor 1;Valor 2\n';
+    // ﻿ garantiza codificación UTF-8 correcta en Excel
+    let csv = '\uFEFFPLAN;UBICA;CATEGO;CODFAROS;VALOR1;VALOR2\r\n';
+    
     data.forEach(row => {
-      csvContent += `"${row.codigo}";"${row.descripcion}";"${row.categoriaNombre}";"${row.obraSocialNombre}";"${row.planNombre}";"${row.ubicacionNombre}";"${row.codigoFarmaciaOs}";"${row.farmaciaNombre}";"${row.activo ? 'Activo' : 'Inactivo'}";${row.valor1};${row.valor2}\n`;
+      // Mapeo del código de categoría a letra corta: 'E', 'G', 'H'
+      let categoCode = 'E';
+      if (row.categoriaId === 2) categoCode = 'G';
+      else if (row.categoriaId === 3) categoCode = 'H';
+      else if (row.categoriaNombre?.includes('GENÉRICO') || row.categoriaNombre?.includes('G')) categoCode = 'G';
+      else if (row.categoriaNombre?.includes('HOSPITALARIO') || row.categoriaNombre?.includes('H')) categoCode = 'H';
+
+      const planIdNum = row.planId;
+      const ubicaIdNum = row.ubicacionId;
+      const codFarOs = row.codigoFarmaciaOs || '';
+      const v1 = row.valor1.toFixed(2).replace('.', ',');
+      const v2 = row.valor2.toFixed(2).replace('.', ',');
+
+      csv += `${planIdNum};${ubicaIdNum};${categoCode};${codFarOs};${v1};${v2}\r\n`;
     });
-    const encodedUri = encodeURI(csvContent);
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
     link.setAttribute('download', `Bonificaciones_${Date.now()}.csv`);
     document.body.appendChild(link);
     link.click();
