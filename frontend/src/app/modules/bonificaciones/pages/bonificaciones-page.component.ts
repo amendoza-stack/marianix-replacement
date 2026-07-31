@@ -77,8 +77,7 @@ import { BonificacionFormDialogComponent } from '../dialogs/bonificacion-form-di
           <ng-container matColumnDef="farmacia">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Farmacia OS</th>
             <td mat-cell *matCellDef="let el">
-              <span class="font-mono font-bold text-blue">{{ el.farmaciaId }}</span> - {{ el.farmaciaNombre }}
-              <small class="text-muted" *ngIf="el.codigoFarmaciaOs"> (Cod OS: {{ el.codigoFarmaciaOs }})</small>
+              <span class="font-mono font-bold text-blue">{{ el.codigoFarmaciaOs }}</span> - {{ el.farmaciaNombre }}
             </td>
           </ng-container>
 

@@ -220,7 +220,7 @@ import { PlanMonodrogaFormDialogComponent } from '../dialogs/plan-monodroga-form
 
                   <table mat-table [dataSource]="farmaciasOsDataSource" matSort class="full-width-table">
                     <ng-container matColumnDef="codos"><th mat-header-cell *matHeaderCellDef mat-sort-header>Código OS (CODFAROS)</th><td mat-cell *matCellDef="let el" class="font-mono text-blue font-bold">{{ el.codigoFarmaciaOs }}</td></ng-container>
-                    <ng-container matColumnDef="codint"><th mat-header-cell *matHeaderCellDef mat-sort-header>Código Interno</th><td mat-cell *matCellDef="let el" class="font-mono">{{ el.farmaciaCodigoInterno }}</td></ng-container>
+                    
                     <ng-container matColumnDef="razonSocial"><th mat-header-cell *matHeaderCellDef mat-sort-header>Razón Social (Padrón)</th><td mat-cell *matCellDef="let el"><strong>{{ el.farmaciaRazonSocial }}</strong></td></ng-container>
                     <ng-container matColumnDef="cuit"><th mat-header-cell *matHeaderCellDef mat-sort-header>CUIT</th><td mat-cell *matCellDef="let el" class="font-mono">{{ el.farmaciaCuit }}</td></ng-container>
                     <ng-container matColumnDef="estado"><th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th><td mat-cell *matCellDef="let el"><span class="badge" [ngClass]="el.activo ? 'badge-active' : 'badge-inactive'">{{ el.activo ? 'ACTIVO' : 'INACTIVO' }}</span></td></ng-container>
@@ -365,7 +365,7 @@ export class ObrasSocialesPageComponent implements OnInit {
   // FARMACIAS OS
   farmaciasOsList: FarmaciaOsInterface[] = [];
   farmaciasOsDataSource = new MatTableDataSource<FarmaciaOsInterface>([]);
-  farmCols = ['codos', 'codint', 'razonSocial', 'cuit', 'estado', 'acciones'];
+  farmCols = ['codos', 'razonSocial', 'cuit', 'estado', 'acciones'];
   searchFarm = '';
 
   // PLAN MONODROGA
