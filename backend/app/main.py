@@ -65,3 +65,14 @@ app.include_router(obras_sociales.router)
 app.include_router(laboratorios.router)
 from app.routers import permisos
 app.include_router(permisos.router)
+
+from app.routers import configuracion, seguridad, medica, medicamentos, bonificaciones
+
+app.include_router(configuracion.router)
+app.include_router(seguridad.router)
+app.include_router(medica.router)
+app.include_router(medicamentos.router)
+app.include_router(bonificaciones.router)
+
+from app.routers import salud_ext
+app.include_router(salud_ext.router)

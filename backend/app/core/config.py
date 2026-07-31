@@ -1,32 +1,27 @@
-﻿import sys
-from typing import List, Union
-from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from typing import Optional
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "Marianix Replacement API"
-    VERSION: str = "1.0.0"
+    PROJECT_NAME: str = "FarmakD Backend API"
+    VERSION: str = "3.0.0"
     API_V1_STR: str = "/api/v1"
-    ENV: str = "development"
+    
+    # Flags de Infraestructura
     DEBUG: bool = True
-
-    # Security JWT
-    SECRET_KEY: str = "marianix_prod_secret_key_change_in_production_32bytes"
+    
+    # Database
+    DATABASE_URL: str = "sqlite:///./farmakd.db"
+    
+    # JWT
+    SECRET_KEY: str = "FAKED_SECRET_KEY_SUPER_SECURE_987654321_LAFKEN26"
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
-    REFRESH_TOKEN_EXPIRE_MINUTES: int = 480 # 8 horas
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 480
+    
+    # Superadmin
+    SUPERUSER_NAME: str = "anamendoza"
+    SUPERUSER_EMAIL: str = "amendoza@farmakd.com"
+    SUPERUSER_PASS: str = "Lafken26"
 
-    DATABASE_URL: str = "sqlite:///./marianix_dev.db"
-    BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:4200", "http://127.0.0.1:4200"]
-
-    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
-    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
-        if isinstance(v, str) and not v.startswith("["):
-            return [i.strip() for i in v.split(",")]
-        elif isinstance(v, list):
-            return v
-        raise ValueError(v)
-
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", case_sensitive=True, extra="ignore")
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 settings = Settings()
