@@ -37,7 +37,7 @@ export class BonificacionesService {
       obraSocialId: 2, obraSocialNombre: 'SWISS MEDICAL S.A.',
       planId: 3, planNombre: 'PLAN SMG20',
       ubicacionId: 2, ubicacionNombre: 'SUCURSAL CÓRDOBA',
-      farmaciaId: 2, farmaciaOsConvenioId: 102, codigoFarmaciaOs: '102', farmaciaNombre: 'FARMACIA DEL SOL',
+      farmaciaId: 2, farmaciaOsConvenioId: 104, codigoFarmaciaOs: '205', farmaciaNombre: 'FARMACIA DEL SOL',
       valor1: 22.0,
       valor2: 90.0,
       activo: true,

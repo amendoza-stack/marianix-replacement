@@ -92,7 +92,7 @@ import { BonificacionInterface } from '../models/bonificacion.model';
             <mat-error *ngIf="form.get('planId')?.hasError('required')">Plan obligatorio</mat-error>
           </mat-form-field>
 
-          <!-- AUTOCOMPLETE FARMACIA OS -->
+          <!-- AUTOCOMPLETE FARMACIA OS (COHERENCIA CON PESTAÑA FARMACIAS OS) -->
           <mat-form-field appearance="outline" class="col-full">
             <mat-label>Farmacia Convenida (Padrón General) *</mat-label>
             <input type="text" matInput formControlName="farmaciaOsInput" [matAutocomplete]="autoFarmOs" [placeholder]="farmaciaOsPlaceholder">
@@ -103,7 +103,7 @@ import { BonificacionInterface } from '../models/bonificacion.model';
             </mat-autocomplete>
             <mat-error *ngIf="form.get('farmaciaOsConvenioId')?.hasError('required')">Farmacia obligatoria</mat-error>
             <mat-hint *ngIf="sinFarmaciasOs" class="text-warn-hint">
-              <mat-icon class="hint-ic">info</mat-icon> La Obra Social seleccionada no posee Farmacias del Padrón asociadas.
+              <mat-icon class="hint-ic">info</mat-icon> La Obra Social seleccionada no posee Farmacias asociadas.
             </mat-hint>
           </mat-form-field>
 
@@ -188,10 +188,12 @@ export class BonificacionFormDialogComponent implements OnInit {
     { id: 4, obraSocialId: 3, nombre: 'PLAN GALENO 200' }
   ];
 
+  // FARMACIAS OS CON COHERENCIA EXACTA A LA PESTAÑA FARMACIAS OS
   conveniosFarmaciasOs = [
     { id: 101, obraSocialId: 1, farmaciaId: 1, codigoFarmaciaOs: '102', farmaciaNombrePadron: 'FARMACIA CENTRAL BUENOS AIRES', cuit: '30-71234567-8', activo: true },
     { id: 102, obraSocialId: 1, farmaciaId: 2, codigoFarmaciaOs: '205', farmaciaNombrePadron: 'FARMACIA DEL SOL', cuit: '30-68994021-4', activo: true },
-    { id: 103, obraSocialId: 2, farmaciaId: 1, codigoFarmaciaOs: '501', farmaciaNombrePadron: 'FARMACIA CENTRAL BUENOS AIRES', cuit: '30-71234567-8', activo: true }
+    { id: 103, obraSocialId: 2, farmaciaId: 1, codigoFarmaciaOs: '501', farmaciaNombrePadron: 'FARMACIA CENTRAL BUENOS AIRES', cuit: '30-71234567-8', activo: true },
+    { id: 104, obraSocialId: 2, farmaciaId: 2, codigoFarmaciaOs: '205', farmaciaNombrePadron: 'FARMACIA DEL SOL', cuit: '30-68994021-4', activo: true }
   ];
 
   planesFiltrados: any[] = [];
@@ -307,7 +309,7 @@ export class BonificacionFormDialogComponent implements OnInit {
       this.form.patchValue({ farmaciaId: null, farmaciaOsConvenioId: null, farmaciaOsInput: null });
     } else {
       this.sinFarmaciasOs = false;
-      this.farmaciaOsPlaceholder = 'Buscar por CODFAROS o nombre del Padrón...';
+      this.farmaciaOsPlaceholder = 'Buscar por CODFAROS o Razón Social...';
       farmaciaCtrl?.enable();
     }
 
@@ -320,7 +322,7 @@ export class BonificacionFormDialogComponent implements OnInit {
   displayFnFarmaciaOs(item: any): string {
     if (!item) return '';
     if (item.codigoFarmaciaOs && item.farmaciaNombrePadron) {
-      return `${item.farmaciaId} - ${item.farmaciaNombrePadron} (OS: ${item.codigoFarmaciaOs})`;
+      return `${item.codigoFarmaciaOs} - ${item.farmaciaNombrePadron}`;
     }
     return item.farmaciaNombrePadron || '';
   }
