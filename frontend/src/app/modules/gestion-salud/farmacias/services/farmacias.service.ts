@@ -12,7 +12,7 @@ export class FarmaciasService {
   private list: FarmaciaInterface[] = [
     {
       id: 1,
-      codigo: 'FAR-001',
+      codigo: '1',
       descripcion: 'FARMACIA CENTRAL BUENOS AIRES',
       paisId: 1, paisNombre: 'ARGENTINA',
       provinciaId: 1, provinciaNombre: 'BUENOS AIRES',
@@ -28,7 +28,7 @@ export class FarmaciasService {
     },
     {
       id: 2,
-      codigo: 'FAR-002',
+      codigo: '2',
       descripcion: 'FARMACIA DEL SOL',
       paisId: 1, paisNombre: 'ARGENTINA',
       provinciaId: 2, provinciaNombre: 'CÓRDOBA',
@@ -69,7 +69,7 @@ export class FarmaciasService {
     const newItem: FarmaciaInterface = {
       ...item,
       id: Date.now(),
-      codigo: 'FAR-' + String(this.list.length + 1).padStart(3, '0'),
+      codigo: String(this.list.length + 1),
       fechaAlta: new Date().toISOString().split('T')[0]
     };
     this.list.unshift(newItem);
