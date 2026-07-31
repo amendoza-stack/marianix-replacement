@@ -22,7 +22,7 @@ export class BonificacionesService {
       obraSocialId: 1, obraSocialNombre: 'OSDE ORGANIZACIÓN DE SERVICIOS DIRECTOS EMPRESARIOS',
       planId: 1, planNombre: 'PLAN 210',
       ubicacionId: 1, ubicacionNombre: 'CENTRO METROPOLITANO',
-      farmaciaOsId: 102, codigoFarmaciaOs: '102', farmaciaNombre: 'FARMACIA CENTRAL QUILMES',
+      farmaciaId: 1, farmaciaOsConvenioId: 101, codigoFarmaciaOs: '102', farmaciaNombre: 'FARMACIA CENTRAL BUENOS AIRES',
       valor1: 15.5,
       valor2: 5.0,
       activo: true,
@@ -37,7 +37,7 @@ export class BonificacionesService {
       obraSocialId: 2, obraSocialNombre: 'SWISS MEDICAL S.A.',
       planId: 3, planNombre: 'PLAN SMG20',
       ubicacionId: 2, ubicacionNombre: 'SUCURSAL CÓRDOBA',
-      farmaciaOsId: 205, codigoFarmaciaOs: '205', farmaciaNombre: 'FARMACIA BELGRANO CABA',
+      farmaciaId: 2, farmaciaOsConvenioId: 102, codigoFarmaciaOs: '205', farmaciaNombre: 'FARMACIA DEL SOL',
       valor1: 20.0,
       valor2: 10.0,
       activo: true,
@@ -61,7 +61,7 @@ export class BonificacionesService {
       x.obraSocialId === item.obraSocialId &&
       x.planId === item.planId &&
       x.ubicacionId === item.ubicacionId &&
-      x.farmaciaOsId === item.farmaciaOsId &&
+      x.farmaciaOsConvenioId === item.farmaciaOsConvenioId &&
       x.id !== item.id &&
       x.activo !== false
     );
@@ -108,7 +108,7 @@ export class BonificacionesService {
       x.obraSocialId === req.obraSocialId &&
       x.planId === req.planId &&
       x.ubicacionId === req.ubicacionId &&
-      x.farmaciaOsId === req.farmaciaOsId &&
+      x.farmaciaId === req.farmaciaId &&
       x.activo === true
     );
 
