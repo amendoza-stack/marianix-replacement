@@ -443,19 +443,24 @@ export class ObrasSocialesPageComponent implements OnInit {
   onGuardarObraSocial() {
     if (this.formOS.valid) {
       const raw = this.formOS.getRawValue();
-      const payload: ObraSocialInterface = {
+      const cleanStr = (val: string | null | undefined) => (val && val.trim().length > 0) ? val.trim().toUpperCase() : null;
+      
+      const payload: any = {
         ...(raw.id ? { id: raw.id } : {}),
-        codigo: raw.codigo || 'OS-AUTO',
         descripcion: raw.descripcion!.trim().toUpperCase(),
-        sigla: raw.sigla ? raw.sigla.trim().toUpperCase() : '',
-        cuit: raw.cuit ? raw.cuit.trim() : '',
-        provinciaNombre: raw.provinciaNombre ? raw.provinciaNombre.trim().toUpperCase() : '',
-        localidad: raw.localidad ? raw.localidad.trim().toUpperCase() : '',
-        direccion: raw.direccion ? raw.direccion.trim().toUpperCase() : '',
-        telefonos: raw.telefonos ? raw.telefonos.trim() : '',
-        mail: raw.mail ? raw.mail.trim().toLowerCase() : '',
-        activo: raw.activo!
+        sigla: cleanStr(raw.sigla),
+        cuit: raw.cuit ? raw.cuit.trim() : null,
+        paisId: raw.paisId || 1,
+        provinciaNombre: cleanStr(raw.provinciaNombre),
+        localidad: cleanStr(raw.localidad),
+        direccion: cleanStr(raw.direccion),
+        telefonos: raw.telefonos ? raw.telefonos.trim() : null,
+        mail: raw.mail ? raw.mail.trim().toLowerCase() : null,
+        activo: Boolean(raw.activo)
       };
+      if (raw.id) {
+        payload.codigo = raw.codigo;
+      }
 
       this.service.saveObraSocial(payload).subscribe({
         next: (savedOS) => {
