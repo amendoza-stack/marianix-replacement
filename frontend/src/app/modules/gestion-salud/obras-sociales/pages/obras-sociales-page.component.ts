@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatSortModule, MatSort } from '@angular/material/sort';
@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -27,8 +28,8 @@ import { PlanMonodrogaFormDialogComponent } from '../dialogs/plan-monodroga-form
   selector: 'app-obras-sociales-page',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, MatTableModule, MatPaginatorModule, MatSortModule,
-    MatButtonModule, MatIconModule, MatInputModule, MatFormFieldModule, MatDialogModule,
+    CommonModule, FormsModule, ReactiveFormsModule, MatTableModule, MatPaginatorModule, MatSortModule,
+    MatButtonModule, MatIconModule, MatInputModule, MatFormFieldModule, MatSelectModule, MatDialogModule,
     MatSnackBarModule, MatTabsModule, MatCardModule
   ],
   template: `
@@ -36,15 +37,20 @@ import { PlanMonodrogaFormDialogComponent } from '../dialogs/plan-monodroga-form
       <div class="header-actions">
         <div>
           <h1 class="page-title">Gestión de Obras Sociales</h1>
-          <p class="page-subtitle">Administración de Obras Sociales, Planes de Cobertura, Farmacias OS y Reglas de Monodrogas</p>
+          <p class="page-subtitle">Padrón de Obras Sociales y Administración de Planes, Farmacias OS y Monodrogas</p>
         </div>
       </div>
 
       <div class="main-layout-grid">
-        <!-- MAESTRO: LISTADO DE OBRAS SOCIALES -->
+        <!-- MAESTRO: LISTADO Y BOTÓN NUEVA OBRA SOCIAL -->
         <mat-card class="master-card">
           <mat-card-header class="card-hdr">
-            <mat-card-title class="hdr-title"><mat-icon color="primary">local_hospital</mat-icon> Obras Sociales</mat-card-title>
+            <div class="master-hdr-content">
+              <mat-card-title class="hdr-title"><mat-icon color="primary">local_hospital</mat-icon> Obras Sociales</mat-card-title>
+              <button mat-flat-button color="primary" class="btn-new-os" (click)="onNuevaObraSocial()">
+                <mat-icon>add</mat-icon> Nueva Obra Social
+              </button>
+            </div>
           </mat-card-header>
           <mat-card-content class="card-cnt">
             <mat-form-field appearance="outline" class="full-width search-sm">
@@ -59,7 +65,9 @@ import { PlanMonodrogaFormDialogComponent } from '../dialogs/plan-monodroga-form
                    (click)="selectObraSocial(os)">
                 <div class="os-item-header">
                   <span class="os-code">{{ os.codigo }}</span>
-                  <span class="badge badge-active" *ngIf="os.activo">ACTIVA</span>
+                  <span class="badge" [ngClass]="os.activo ? 'badge-active' : 'badge-inactive'">
+                    {{ os.activo ? 'ACTIVA' : 'INACTIVA' }}
+                  </span>
                 </div>
                 <div class="os-name">{{ os.descripcion }}</div>
                 <div class="os-cuit">CUIT: {{ os.cuit }}</div>
@@ -68,25 +76,104 @@ import { PlanMonodrogaFormDialogComponent } from '../dialogs/plan-monodroga-form
           </mat-card-content>
         </mat-card>
 
-        <!-- DETALLE: PESTAÑAS Y SUBMÓDULOS HIJOS -->
-        <mat-card class="detail-card" *ngIf="selectedOS">
-          <mat-card-header class="card-hdr hdr-selected">
-            <div>
-              <span class="selected-tag">Obra Social Seleccionada:</span>
-              <h2 class="selected-title">{{ selectedOS.descripcion }} ({{ selectedOS.codigo }})</h2>
+        <!-- DETALLE: FORMULARIO MAESTRO (ALTA / EDICIÓN) + PESTAÑAS HIJAS -->
+        <mat-card class="detail-card" *ngIf="formOS">
+          <mat-card-header class="card-hdr" [ngClass]="isEditMode ? 'hdr-selected' : 'hdr-new'">
+            <div class="detail-hdr-box">
+              <div>
+                <span class="selected-tag">{{ isEditMode ? 'Editando Obra Social:' : 'Modo Alta:' }}</span>
+                <h2 class="selected-title">{{ isEditMode ? selectedOS?.descripcion : 'Crear Nueva Obra Social' }}</h2>
+              </div>
+              <button mat-flat-button color="primary" class="btn-save-os" [disabled]="formOS.invalid" (click)="onGuardarObraSocial()">
+                <mat-icon>save</mat-icon> {{ isEditMode ? 'Guardar Cambios' : 'Guardar Obra Social' }}
+              </button>
             </div>
           </mat-card-header>
 
           <mat-card-content class="card-cnt">
-            <mat-tab-group animationDuration="150ms">
+            <!-- FORMULARIO MAESTRO DE OBRA SOCIAL -->
+            <form [formGroup]="formOS" class="os-form-grid">
+              <mat-form-field appearance="outline" class="col-third">
+                <mat-label>Código (Auto)</mat-label>
+                <input matInput formControlName="codigo" readonly class="code-input">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-two-third">
+                <mat-label>Descripción / Razón Social *</mat-label>
+                <input matInput formControlName="descripcion" placeholder="Ej: OSDE ORGANIZACIÓN DE SERVICIOS DIRECTOS EMPRESARIOS">
+                <mat-error *ngIf="formOS.get('descripcion')?.hasError('required')">Descripción obligatoria</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-third">
+                <mat-label>Sigla / Nombre Corto</mat-label>
+                <input matInput formControlName="sigla" placeholder="Ej: OSDE">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-third">
+                <mat-label>CUIT</mat-label>
+                <input matInput formControlName="cuit" placeholder="30-54674125-9">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-third">
+                <mat-label>País *</mat-label>
+                <mat-select formControlName="paisId">
+                  <mat-option [value]="1">ARGENTINA</mat-option>
+                </mat-select>
+                <mat-error *ngIf="formOS.get('paisId')?.hasError('required')">País obligatorio</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-third">
+                <mat-label>Provincia</mat-label>
+                <input matInput formControlName="provinciaNombre" placeholder="BUENOS AIRES">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-third">
+                <mat-label>Localidad / Ciudad</mat-label>
+                <input matInput formControlName="localidad" placeholder="CABA">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-third">
+                <mat-label>Dirección</mat-label>
+                <input matInput formControlName="direccion" placeholder="AV. CORRIENTES 1234">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-third">
+                <mat-label>Teléfono</mat-label>
+                <input matInput formControlName="telefonos" placeholder="011-4321-8800">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-third">
+                <mat-label>Mail</mat-label>
+                <input matInput formControlName="mail" placeholder="contacto@obrasocial.com.ar">
+                <mat-error *ngIf="formOS.get('mail')?.hasError('email')">Formato de correo inválido</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-third">
+                <mat-label>Estado *</mat-label>
+                <mat-select formControlName="activo">
+                  <mat-option [value]="true">Activo</mat-option>
+                  <mat-option [value]="false">Inactivo</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </form>
+
+            <hr class="section-divider">
+
+            <!-- PESTAÑAS HIJAS (HABILITADAS SOLO EN MODO EDICIÓN / DESPUÉS DE GUARDAR) -->
+            <div *ngIf="!isEditMode" class="alert-disabled-tabs">
+              <mat-icon class="alert-ic">info</mat-icon>
+              <span>Debe guardar primero la Obra Social para administrar sus datos relacionados.</span>
+            </div>
+
+            <mat-tab-group animationDuration="150ms" [selectedIndex]="0">
               
               <!-- PESTAÑA 1: PLANES COBERTURA -->
-              <mat-tab>
+              <mat-tab [disabled]="!isEditMode">
                 <ng-template mat-tab-label>
                   <mat-icon class="tab-ic">assignment</mat-icon> Planes Cobertura ({{ planesList.length }})
                 </ng-template>
 
-                <div class="tab-content">
+                <div class="tab-content" *ngIf="isEditMode">
                   <div class="sub-hdr">
                     <mat-form-field appearance="outline" class="search-sm">
                       <mat-label>Buscar Plan...</mat-label>
@@ -117,12 +204,12 @@ import { PlanMonodrogaFormDialogComponent } from '../dialogs/plan-monodroga-form
               </mat-tab>
 
               <!-- PESTAÑA 2: FARMACIAS OS -->
-              <mat-tab>
+              <mat-tab [disabled]="!isEditMode">
                 <ng-template mat-tab-label>
                   <mat-icon class="tab-ic">local_pharmacy</mat-icon> Farmacias OS ({{ farmaciasOsList.length }})
                 </ng-template>
 
-                <div class="tab-content">
+                <div class="tab-content" *ngIf="isEditMode">
                   <div class="sub-hdr">
                     <mat-form-field appearance="outline" class="search-sm">
                       <mat-label>Buscar Farmacia OS...</mat-label>
@@ -153,12 +240,12 @@ import { PlanMonodrogaFormDialogComponent } from '../dialogs/plan-monodroga-form
               </mat-tab>
 
               <!-- PESTAÑA 3: PLAN / MONODROGA -->
-              <mat-tab>
+              <mat-tab [disabled]="!isEditMode">
                 <ng-template mat-tab-label>
                   <mat-icon class="tab-ic">science</mat-icon> Plan / Monodroga ({{ planMonodrogasList.length }})
                 </ng-template>
 
-                <div class="tab-content">
+                <div class="tab-content" *ngIf="isEditMode">
                   <div class="sub-hdr">
                     <mat-form-field appearance="outline" class="search-sm">
                       <mat-label>Buscar Regla Plan/Monodroga...</mat-label>
@@ -201,10 +288,15 @@ import { PlanMonodrogaFormDialogComponent } from '../dialogs/plan-monodroga-form
     .main-layout-grid { display: grid; grid-template-columns: 320px 1fr; gap: 16px; }
     .master-card, .detail-card { background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color); }
     .card-hdr { padding: 12px 16px; border-bottom: 1px solid var(--border-color); }
+    .master-hdr-content { display: flex; justify-content: space-between; align-items: center; width: 100%; }
     .hdr-title { font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; gap: 8px; margin: 0; }
+    .btn-new-os { font-weight: 700; height: 32px; font-size: 0.8rem; }
     .hdr-selected { background: #F0F9FF; }
+    .hdr-new { background: #FEF3C7; }
+    .detail-hdr-box { display: flex; justify-content: space-between; align-items: center; width: 100%; }
     .selected-tag { font-size: 0.72rem; font-weight: 800; color: #0284C7; text-transform: uppercase; }
     .selected-title { font-size: 1.1rem; font-weight: 800; color: #0369A1; margin: 0; }
+    .btn-save-os { font-weight: 700; height: 36px; background-color: var(--brand-primary) !important; }
     .card-cnt { padding: 12px 16px !important; }
     .full-width { width: 100%; }
     .search-sm { margin-bottom: 8px; }
@@ -216,6 +308,13 @@ import { PlanMonodrogaFormDialogComponent } from '../dialogs/plan-monodroga-form
     .os-code { font-family: monospace; font-weight: 800; color: #0284C7; font-size: 0.8rem; }
     .os-name { font-weight: 700; font-size: 0.88rem; color: var(--text-main); line-height: 1.2; }
     .os-cuit { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+    .os-form-grid { display: flex; flex-wrap: wrap; gap: 10px; width: 100%; margin-bottom: 12px; }
+    .col-third { width: calc(33.33% - 7px); }
+    .col-two-third { width: calc(66.66% - 3px); }
+    .code-input { font-weight: 800; color: #0284C7 !important; background: #F0F9FF !important; }
+    .section-divider { border: 0; border-top: 1px solid var(--border-color); margin: 16px 0; }
+    .alert-disabled-tabs { background: #FFFBEB; border: 1px solid #FCD34D; color: #B45309; padding: 10px 14px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .alert-ic { font-size: 18px; width: 18px; height: 18px; }
     .tab-ic { font-size: 18px; width: 18px; height: 18px; margin-right: 6px; }
     .tab-content { padding-top: 12px; display: flex; flex-direction: column; gap: 8px; }
     .sub-hdr { display: flex; justify-content: space-between; align-items: center; }
@@ -232,6 +331,7 @@ import { PlanMonodrogaFormDialogComponent } from '../dialogs/plan-monodroga-form
   `]
 })
 export class ObrasSocialesPageComponent implements OnInit {
+  private fb = inject(FormBuilder);
   private service = inject(ObrasSocialesService);
   private dialog = inject(MatDialog);
   private snack = inject(MatSnackBar);
@@ -239,6 +339,22 @@ export class ObrasSocialesPageComponent implements OnInit {
   osDataSource = new MatTableDataSource<ObraSocialInterface>([]);
   selectedOS: ObraSocialInterface | null = null;
   searchOS = '';
+  isEditMode = false;
+
+  formOS = this.fb.group({
+    id: [null as number | null],
+    codigo: ['OS-AUTO'],
+    descripcion: ['', Validators.required],
+    sigla: [''],
+    cuit: [''],
+    paisId: [1, Validators.required],
+    provinciaNombre: [''],
+    localidad: [''],
+    direccion: [''],
+    telefonos: [''],
+    mail: ['', Validators.email],
+    activo: [true, Validators.required]
+  });
 
   // PLANES
   planesList: PlanCoberturaInterface[] = [];
@@ -263,9 +379,13 @@ export class ObrasSocialesPageComponent implements OnInit {
   @ViewChild('pmPaginator') pmPaginator!: MatPaginator;
 
   ngOnInit() {
+    this.loadObrasSociales();
+  }
+
+  loadObrasSociales() {
     this.service.getAllObraSociales().subscribe(res => {
       this.osDataSource.data = res;
-      if (res.length > 0) {
+      if (res.length > 0 && !this.selectedOS) {
         this.selectObraSocial(res[0]);
       }
     });
@@ -275,16 +395,85 @@ export class ObrasSocialesPageComponent implements OnInit {
     this.osDataSource.filter = this.searchOS.trim().toLowerCase();
   }
 
+  onNuevaObraSocial() {
+    this.selectedOS = null;
+    this.isEditMode = false;
+    this.formOS.reset({
+      id: null,
+      codigo: 'OS-NEW',
+      descripcion: '',
+      sigla: '',
+      cuit: '',
+      paisId: 1,
+      provinciaNombre: '',
+      localidad: '',
+      direccion: '',
+      telefonos: '',
+      mail: '',
+      activo: true
+    });
+    this.planesList = []; this.planesDataSource.data = [];
+    this.farmaciasOsList = []; this.farmaciasOsDataSource.data = [];
+    this.planMonodrogasList = []; this.planMonodrogasDataSource.data = [];
+  }
+
   selectObraSocial(os: ObraSocialInterface) {
     this.selectedOS = os;
+    this.isEditMode = true;
+    this.formOS.patchValue({
+      id: os.id,
+      codigo: os.codigo,
+      descripcion: os.descripcion,
+      sigla: os.sigla || '',
+      cuit: os.cuit,
+      paisId: 1,
+      provinciaNombre: os.provinciaNombre || '',
+      localidad: os.localidad || '',
+      direccion: os.direccion || '',
+      telefonos: os.telefonos || '',
+      mail: os.mail || '',
+      activo: os.activo
+    });
+
     this.loadPlanes();
     this.loadFarmaciasOs();
     this.loadPlanMonodrogas();
   }
 
+  onGuardarObraSocial() {
+    if (this.formOS.valid) {
+      const raw = this.formOS.getRawValue();
+      const payload: ObraSocialInterface = {
+        ...(raw.id ? { id: raw.id } : {}),
+        codigo: raw.codigo || 'OS-AUTO',
+        descripcion: raw.descripcion!.trim().toUpperCase(),
+        sigla: raw.sigla ? raw.sigla.trim().toUpperCase() : '',
+        cuit: raw.cuit ? raw.cuit.trim() : '',
+        provinciaNombre: raw.provinciaNombre ? raw.provinciaNombre.trim().toUpperCase() : '',
+        localidad: raw.localidad ? raw.localidad.trim().toUpperCase() : '',
+        direccion: raw.direccion ? raw.direccion.trim().toUpperCase() : '',
+        telefonos: raw.telefonos ? raw.telefonos.trim() : '',
+        mail: raw.mail ? raw.mail.trim().toLowerCase() : '',
+        activo: raw.activo!
+      };
+
+      this.service.saveObraSocial(payload).subscribe({
+        next: (savedOS) => {
+          this.snack.open('Obra Social guardada exitosamente', 'Aceptar', { duration: 2500 });
+          this.service.getAllObraSociales().subscribe(res => {
+            this.osDataSource.data = res;
+            const updated = res.find(x => x.id === savedOS.id) || savedOS;
+            this.selectObraSocial(updated);
+          });
+        },
+        error: (err) => alert(err.message)
+      });
+    }
+  }
+
   loadPlanes() {
-    if (!this.selectedOS) return;
-    this.service.getPlanesByObraSocial(this.selectedOS.id!).subscribe(res => {
+    if (!this.selectedOS || !this.selectedOS.id) return;
+    this.service.getPlanesByObraSocial(this.selectedOS.id).subscribe(res => {
       this.planesList = res;
       this.planesDataSource.data = res;
       this.planesDataSource.paginator = this.planPaginator;
@@ -292,8 +481,8 @@ export class ObrasSocialesPageComponent implements OnInit {
   }
 
   loadFarmaciasOs() {
-    if (!this.selectedOS) return;
-    this.service.getFarmaciasOsByObraSocial(this.selectedOS.id!).subscribe(res => {
+    if (!this.selectedOS || !this.selectedOS.id) return;
+    this.service.getFarmaciasOsByObraSocial(this.selectedOS.id).subscribe(res => {
       this.farmaciasOsList = res;
       this.farmaciasOsDataSource.data = res;
       this.farmaciasOsDataSource.paginator = this.farmPaginator;
@@ -301,8 +490,8 @@ export class ObrasSocialesPageComponent implements OnInit {
   }
 
   loadPlanMonodrogas() {
-    if (!this.selectedOS) return;
-    this.service.getPlanMonodrogasByObraSocial(this.selectedOS.id!).subscribe(res => {
+    if (!this.selectedOS || !this.selectedOS.id) return;
+    this.service.getPlanMonodrogasByObraSocial(this.selectedOS.id).subscribe(res => {
       this.planMonodrogasList = res;
       this.planMonodrogasDataSource.data = res;
       this.planMonodrogasDataSource.paginator = this.pmPaginator;
@@ -315,7 +504,8 @@ export class ObrasSocialesPageComponent implements OnInit {
 
   // MODALES
   openPlanForm(item?: PlanCoberturaInterface) {
-    this.dialog.open(PlanFormDialogComponent, { width: '560px', data: { obraSocialId: this.selectedOS!.id, item } }).afterClosed().subscribe(res => {
+    if (!this.selectedOS?.id) return;
+    this.dialog.open(PlanFormDialogComponent, { width: '560px', data: { obraSocialId: this.selectedOS.id, item } }).afterClosed().subscribe(res => {
       if (res) {
         this.snack.open('Plan guardado con éxito', 'Aceptar', { duration: 2500 });
         this.loadPlanes();
@@ -333,7 +523,8 @@ export class ObrasSocialesPageComponent implements OnInit {
   }
 
   openFarmaciaOsForm(item?: FarmaciaOsInterface) {
-    this.dialog.open(FarmaciaOsFormDialogComponent, { width: '560px', data: { obraSocialId: this.selectedOS!.id, item } }).afterClosed().subscribe(res => {
+    if (!this.selectedOS?.id) return;
+    this.dialog.open(FarmaciaOsFormDialogComponent, { width: '560px', data: { obraSocialId: this.selectedOS.id, item } }).afterClosed().subscribe(res => {
       if (res) {
         this.snack.open('Farmacia asociada a Obra Social con éxito', 'Aceptar', { duration: 2500 });
         this.loadFarmaciasOs();
@@ -351,7 +542,8 @@ export class ObrasSocialesPageComponent implements OnInit {
   }
 
   openPlanMonodrogaForm(item?: PlanMonodrogaInterface) {
-    this.dialog.open(PlanMonodrogaFormDialogComponent, { width: '560px', data: { obraSocialId: this.selectedOS!.id, item } }).afterClosed().subscribe(res => {
+    if (!this.selectedOS?.id) return;
+    this.dialog.open(PlanMonodrogaFormDialogComponent, { width: '560px', data: { obraSocialId: this.selectedOS.id, item } }).afterClosed().subscribe(res => {
       if (res) {
         this.snack.open('Regla Plan/Monodroga guardada con éxito', 'Aceptar', { duration: 2500 });
         this.loadPlanMonodrogas();

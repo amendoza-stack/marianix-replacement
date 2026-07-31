@@ -54,6 +54,34 @@ export class ObrasSocialesService {
     return of(JSON.parse(JSON.stringify(this.obrasSociales.filter(x => x.activo !== false)))).pipe(delay(200));
   }
 
+    saveObraSocial(item: ObraSocialInterface): Observable<ObraSocialInterface> {
+    const dup = this.obrasSociales.find(x => 
+      x.descripcion.trim().toUpperCase() === item.descripcion.trim().toUpperCase() && 
+      x.id !== item.id && 
+      x.activo !== false
+    );
+
+    if (dup) {
+      return throwError(() => new Error('Ya existe una Obra Social con la misma descripción.'));
+    }
+
+    if (item.id) {
+      const idx = this.obrasSociales.findIndex(x => x.id === item.id);
+      if (idx !== -1) {
+        this.obrasSociales[idx] = { ...this.obrasSociales[idx], ...item };
+        return of(this.obrasSociales[idx]).pipe(delay(200));
+      }
+    }
+
+    const newItem: ObraSocialInterface = {
+      ...item,
+      id: Date.now(),
+      codigo: 'OS-' + String(this.obrasSociales.length + 1).padStart(3, '0')
+    };
+    this.obrasSociales.unshift(newItem);
+    return of(newItem).pipe(delay(200));
+  }
+
   // PLANES
   getPlanesByObraSocial(obraSocialId: number): Observable<PlanCoberturaInterface[]> {
     const res = this.planes.filter(x => x.obraSocialId === obraSocialId && x.activo !== false);
