@@ -1,3 +1,4 @@
+from app.routers import auth, exportaciones, importaciones
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
@@ -76,3 +77,7 @@ app.include_router(bonificaciones.router)
 
 from app.routers import salud_ext
 app.include_router(salud_ext.router)
+
+app.include_router(auth.router)
+app.include_router(exportaciones.router)
+app.include_router(importaciones.router)
