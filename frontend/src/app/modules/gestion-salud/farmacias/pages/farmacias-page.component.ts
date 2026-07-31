@@ -250,7 +250,7 @@ export class FarmaciasPageComponent implements OnInit {
 
   load() {
     this.service.getAll().subscribe(res => {
-      this.dataSource.data = res;
+      this.dataSource.data = res.filter(x => x.activo !== false);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
     });
