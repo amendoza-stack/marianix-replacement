@@ -26,7 +26,7 @@ import { BonificacionFormDialogComponent } from '../dialogs/bonificacion-form-di
       <div class="header-actions">
         <div>
           <h1 class="page-title">Gestión de Bonificaciones</h1>
-          <p class="page-subtitle">Parametrización de valores de bonificación para consulta automática en Recetas</p>
+          <p class="page-subtitle">Parametrización por Obra Social, Plan, Ubicación y Farmacias OS</p>
         </div>
         <div class="btn-group">
           <button mat-stroked-button color="primary" class="btn-action" (click)="onExportar()">
@@ -40,7 +40,7 @@ import { BonificacionFormDialogComponent } from '../dialogs/bonificacion-form-di
 
       <div class="card-table">
         <mat-form-field appearance="outline" class="search-field">
-          <mat-label>Buscar por código, descripción, categoría, Obra Social, plan o farmacia...</mat-label>
+          <mat-label>Buscar por código, descripción, categoría, Obra Social, plan o Farmacia OS...</mat-label>
           <input matInput [(ngModel)]="searchTerm" (keyup)="applyFilter()" placeholder="Escriba para filtrar...">
           <mat-icon matSuffix>search</mat-icon>
         </mat-form-field>
@@ -75,8 +75,10 @@ import { BonificacionFormDialogComponent } from '../dialogs/bonificacion-form-di
           </ng-container>
 
           <ng-container matColumnDef="farmacia">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Farmacia</th>
-            <td mat-cell *matCellDef="let el">{{ el.farmaciaNombre }} ({{ el.farmaciaCodigo }})</td>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Farmacia OS</th>
+            <td mat-cell *matCellDef="let el">
+              <span class="font-mono font-bold text-blue">{{ el.codigoFarmaciaOs }}</span> - {{ el.farmaciaNombre }}
+            </td>
           </ng-container>
 
           <ng-container matColumnDef="valor1">
@@ -181,6 +183,6 @@ export class BonificacionesPageComponent implements OnInit {
 
   onExportar() {
     this.service.exportarExcel(this.dataSource.data);
-    this.snack.open('Archivo de bonificaciones exportado con éxito', 'Aceptar', { duration: 2500 });
+    this.snack.open('Archivo de bonificaciones exportado con éxito con columna CODFAROS', 'Aceptar', { duration: 2500 });
   }
 }

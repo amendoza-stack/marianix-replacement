@@ -18,11 +18,11 @@ export class BonificacionesService {
       id: 1,
       codigo: 'BON-001',
       descripcion: 'BONIFICACIÓN PADRÓN GENERAL OSDE PLAN 210',
-      categoriaId: 1, categoriaNombre: 'MEDICAMENTOS AMBULATORIOS',
+      categoriaId: 1, categoriaNombre: 'ÉTICO (E)',
       obraSocialId: 1, obraSocialNombre: 'OSDE ORGANIZACIÓN DE SERVICIOS DIRECTOS EMPRESARIOS',
       planId: 1, planNombre: 'PLAN 210',
       ubicacionId: 1, ubicacionNombre: 'CENTRO METROPOLITANO',
-      farmaciaId: 1, farmaciaCodigo: 'FAR-001', farmaciaNombre: 'FARMACIA CENTRAL BUENOS AIRES',
+      farmaciaOsId: 102, codigoFarmaciaOs: '102', farmaciaNombre: 'FARMACIA CENTRAL QUILMES',
       valor1: 15.5,
       valor2: 5.0,
       activo: true,
@@ -33,11 +33,11 @@ export class BonificacionesService {
       id: 2,
       codigo: 'BON-002',
       descripcion: 'DESCUENTO ESPECIAL SWISS MEDICAL CORDOBA',
-      categoriaId: 2, categoriaNombre: 'ALTA COMPLEXIDAD / ONCOLÓGICOS',
+      categoriaId: 2, categoriaNombre: 'GENÉRICO (G)',
       obraSocialId: 2, obraSocialNombre: 'SWISS MEDICAL S.A.',
       planId: 3, planNombre: 'PLAN SMG20',
       ubicacionId: 2, ubicacionNombre: 'SUCURSAL CÓRDOBA',
-      farmaciaId: 2, farmaciaCodigo: 'FAR-002', farmaciaNombre: 'FARMACIA DEL SOL',
+      farmaciaOsId: 205, codigoFarmaciaOs: '205', farmaciaNombre: 'FARMACIA BELGRANO CABA',
       valor1: 20.0,
       valor2: 10.0,
       activo: true,
@@ -61,7 +61,7 @@ export class BonificacionesService {
       x.obraSocialId === item.obraSocialId &&
       x.planId === item.planId &&
       x.ubicacionId === item.ubicacionId &&
-      x.farmaciaId === item.farmaciaId &&
+      x.farmaciaOsId === item.farmaciaOsId &&
       x.id !== item.id &&
       x.activo !== false
     );
@@ -102,14 +102,13 @@ export class BonificacionesService {
     return of(false);
   }
 
-  // MÉTODO EXPUESTO PARA INTEGRACIÓN FUTURA CON EL MÓDULO DE RECETAS
   obtenerBonificacionParaReceta(req: BonificacionConsultaRecetaRequestDto): Observable<BonificacionConsultaRecetaResponseDto> {
     const match = this.list.find(x =>
       x.categoriaId === req.categoriaId &&
       x.obraSocialId === req.obraSocialId &&
       x.planId === req.planId &&
       x.ubicacionId === req.ubicacionId &&
-      x.farmaciaId === req.farmaciaId &&
+      x.farmaciaOsId === req.farmaciaOsId &&
       x.activo === true
     );
 
@@ -132,9 +131,9 @@ export class BonificacionesService {
   }
 
   exportarExcel(data: BonificacionInterface[]): void {
-    let csvContent = 'data:text/csv;charset=utf-8,Codigo;Descripcion;Categoria;Obra Social;Plan;Ubicacion;Codigo Farmacia;Nombre Farmacia;Estado;Valor 1;Valor 2\n';
+    let csvContent = 'data:text/csv;charset=utf-8,Codigo;Descripcion;Categoria;Obra Social;Plan;Ubicacion;CODFAROS;Nombre Farmacia;Estado;Valor 1;Valor 2\n';
     data.forEach(row => {
-      csvContent += `"${row.codigo}";"${row.descripcion}";"${row.categoriaNombre}";"${row.obraSocialNombre}";"${row.planNombre}";"${row.ubicacionNombre}";"${row.farmaciaCodigo}";"${row.farmaciaNombre}";"${row.activo ? 'Activo' : 'Inactivo'}";${row.valor1};${row.valor2}\n`;
+      csvContent += `"${row.codigo}";"${row.descripcion}";"${row.categoriaNombre}";"${row.obraSocialNombre}";"${row.planNombre}";"${row.ubicacionNombre}";"${row.codigoFarmaciaOs}";"${row.farmaciaNombre}";"${row.activo ? 'Activo' : 'Inactivo'}";${row.valor1};${row.valor2}\n`;
     });
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');

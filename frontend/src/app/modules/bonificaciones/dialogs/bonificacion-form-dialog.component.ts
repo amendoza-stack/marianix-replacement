@@ -8,10 +8,10 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { Observable, of } from 'rxjs';
-import { map, startWith, catchError } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
 import { BonificacionesService } from '../services/bonificaciones.service';
-import { FarmaciasService } from '../../gestion-salud/farmacias/services/farmacias.service';
+import { BonificacionInterface } from '../models/bonificacion.model';
 
 @Component({
   selector: 'app-bonificacion-form-dialog',
@@ -46,8 +46,8 @@ import { FarmaciasService } from '../../gestion-salud/farmacias/services/farmaci
           <!-- AUTOCOMPLETE CATEGORÍA MEDICAMENTO (TABLA AUXILIAR) -->
           <mat-form-field appearance="outline" class="col-half">
             <mat-label>Categoría de Medicamento *</mat-label>
-            <input type="text" matInput formControlName="categoriaInput" [matAutocomplete]="autoCat" placeholder="Buscar categoría en Tabla Auxiliar...">
-            <mat-autocomplete #autoCat="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onCategoriaSelected($event)">
+            <input type="text" matInput formControlName="categoriaInput" [matAutocomplete]="autoCat" placeholder="Buscar categoría...">
+            <mat-autocomplete #autoCat="matAutocomplete" [displayWith]="displayFnCategory" (optionSelected)="onCategoriaSelected($event)">
               <mat-option *ngFor="let option of filteredCategorias | async" [value]="option">
                 {{ option.nombre }}
               </mat-option>
@@ -58,7 +58,7 @@ import { FarmaciasService } from '../../gestion-salud/farmacias/services/farmaci
           <!-- AUTOCOMPLETE UBICACIÓN (TABLA AUXILIAR) -->
           <mat-form-field appearance="outline" class="col-half">
             <mat-label>Ubicación *</mat-label>
-            <input type="text" matInput formControlName="ubicacionInput" [matAutocomplete]="autoUbi" placeholder="Buscar ubicación en Tabla Auxiliar...">
+            <input type="text" matInput formControlName="ubicacionInput" [matAutocomplete]="autoUbi" placeholder="Buscar ubicación...">
             <mat-autocomplete #autoUbi="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onUbicacionSelected($event)">
               <mat-option *ngFor="let option of filteredUbicaciones | async" [value]="option">
                 {{ option.nombre }}
@@ -67,7 +67,7 @@ import { FarmaciasService } from '../../gestion-salud/farmacias/services/farmaci
             <mat-error *ngIf="form.get('ubicacionId')?.hasError('required')">Ubicación obligatoria</mat-error>
           </mat-form-field>
 
-          <!-- AUTOCOMPLETE OBRA SOCIAL (GESTIÓN SALUD) -->
+          <!-- AUTOCOMPLETE OBRA SOCIAL -->
           <mat-form-field appearance="outline" class="col-half">
             <mat-label>Obra Social *</mat-label>
             <input type="text" matInput formControlName="obraSocialInput" [matAutocomplete]="autoOS" placeholder="Buscar Obra Social...">
@@ -91,16 +91,19 @@ import { FarmaciasService } from '../../gestion-salud/farmacias/services/farmaci
             <mat-error *ngIf="form.get('planId')?.hasError('required')">Plan obligatorio</mat-error>
           </mat-form-field>
 
-          <!-- AUTOCOMPLETE FARMACIA (MÓDULO FARMACIA - PADRÓN GENERAL / CONVENIDAS) -->
+          <!-- AUTOCOMPLETE FARMACIA OS (RELACIÓN OBRA SOCIAL -> FARMACIAS OS) -->
           <mat-form-field appearance="outline" class="col-full">
-            <mat-label>Farmacia Convenida *</mat-label>
-            <input type="text" matInput formControlName="farmaciaInput" [matAutocomplete]="autoFarm" placeholder="Buscar farmacia en Padrón General de Farmacias...">
-            <mat-autocomplete #autoFarm="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onFarmaciaSelected($event)">
-              <mat-option *ngFor="let option of filteredFarmacias | async" [value]="option">
-                {{ option.nombre }} - CUIT: {{ option.cuit }} ({{ option.cuf }})
+            <mat-label>Farmacia OS *</mat-label>
+            <input type="text" matInput formControlName="farmaciaOsInput" [matAutocomplete]="autoFarmOs" [placeholder]="farmaciaOsPlaceholder">
+            <mat-autocomplete #autoFarmOs="matAutocomplete" [displayWith]="displayFnFarmaciaOs" (optionSelected)="onFarmaciaOsSelected($event)">
+              <mat-option *ngFor="let option of filteredFarmaciasOs | async" [value]="option">
+                {{ option.codigoFarmaciaOs }} - {{ option.nombre }}
               </mat-option>
             </mat-autocomplete>
-            <mat-error *ngIf="form.get('farmaciaId')?.hasError('required')">Farmacia obligatoria</mat-error>
+            <mat-error *ngIf="form.get('farmaciaOsId')?.hasError('required')">Farmacia OS obligatoria</mat-error>
+            <mat-hint *ngIf="sinFarmaciasOs" class="text-warn-hint">
+              <mat-icon class="hint-ic">info</mat-icon> La Obra Social seleccionada no posee Farmacias asociadas.
+            </mat-hint>
           </mat-form-field>
 
           <!-- VALOR 1 Y VALOR 2 -->
@@ -132,7 +135,7 @@ import { FarmaciasService } from '../../gestion-salud/farmacias/services/farmaci
 
       <mat-dialog-actions align="end" class="dialog-actions">
         <button mat-button mat-dialog-close>Cancelar</button>
-        <button mat-flat-button color="primary" class="btn-save" [disabled]="form.invalid" (click)="onSave()">Guardar</button>
+        <button mat-flat-button color="primary" class="btn-save" [disabled]="form.invalid || sinFarmaciasOs" (click)="onSave()">Guardar</button>
       </mat-dialog-actions>
     </div>
   `,
@@ -148,30 +151,59 @@ import { FarmaciasService } from '../../gestion-salud/farmacias/services/farmaci
     .code-input { font-weight: 800; color: #0284C7 !important; background: #F0F9FF !important; }
     .dialog-actions { padding: 12px 16px !important; border-top: 1px solid var(--border-color); }
     .btn-save { font-weight: 700; height: 40px; padding: 0 20px; background-color: var(--brand-primary) !important; }
+    .text-warn-hint { color: #D97706 !important; font-weight: 600; display: flex; align-items: center; gap: 4px; font-size: 0.78rem; }
+    .hint-ic { font-size: 16px; width: 16px; height: 16px; }
   `]
 })
 export class BonificacionFormDialogComponent implements OnInit {
   private fb = inject(FormBuilder);
   private ref = inject(MatDialogRef<BonificacionFormDialogComponent>);
   private service = inject(BonificacionesService);
-  private farmaciasService = inject(FarmaciasService);
   public data: any = inject(MAT_DIALOG_DATA);
 
-  // TABLAS CONSUMIDAS DE LOS MÓDULOS DEL SISTEMA
-  categoriasList: any[] = [];
-  ubicacionesList: any[] = [];
-  obrasSocialesList: any[] = [];
-  todosPlanes: any[] = [];
-  todasFarmacias: any[] = [];
+  categoriasList = [
+    { id: 1, nombre: 'ÉTICO (E)' },
+    { id: 2, nombre: 'GENÉRICO (G)' },
+    { id: 3, nombre: 'HOSPITALARIO (H)' }
+  ];
+
+  ubicacionesList = [
+    { id: 1, nombre: 'CENTRO METROPOLITANO' },
+    { id: 2, nombre: 'SUCURSAL CÓRDOBA' },
+    { id: 3, nombre: 'ZONA SANTA FE' }
+  ];
+
+  obrasSocialesList = [
+    { id: 1, nombre: 'OSDE ORGANIZACIÓN DE SERVICIOS DIRECTOS EMPRESARIOS' },
+    { id: 2, nombre: 'SWISS MEDICAL S.A.' },
+    { id: 3, nombre: 'GALENO ARGENTINA S.A. (SIN FARMACIAS OS)' }
+  ];
+
+  todosPlanes = [
+    { id: 1, obraSocialId: 1, nombre: 'PLAN 210' },
+    { id: 2, obraSocialId: 1, nombre: 'PLAN 310' },
+    { id: 3, obraSocialId: 2, nombre: 'PLAN SMG20' },
+    { id: 4, obraSocialId: 3, nombre: 'PLAN GALENO 200' }
+  ];
+
+  // RELACIÓN GESTIÓN SALUD -> OBRA SOCIAL -> FARMACIAS OS
+  todasFarmaciasOs = [
+    { id: 1, obraSocialId: 1, codigoFarmaciaOs: '102', nombre: 'FARMACIA CENTRAL QUILMES', activo: true },
+    { id: 2, obraSocialId: 1, codigoFarmaciaOs: '205', nombre: 'FARMACIA BELGRANO CABA', activo: true },
+    { id: 3, obraSocialId: 1, codigoFarmaciaOs: '444', nombre: 'FARMACIA SAN MARTIN', activo: true },
+    { id: 4, obraSocialId: 2, codigoFarmaciaOs: '501', nombre: 'FARMACIA CORDOBA CENTRO', activo: true }
+  ];
 
   planesFiltrados: any[] = [];
-  farmaciasFiltradas: any[] = [];
+  farmaciasOsFiltradas: any[] = [];
+  sinFarmaciasOs = false;
+  farmaciaOsPlaceholder = 'Seleccionar Farmacia OS...';
 
   filteredCategorias!: Observable<any[]>;
   filteredUbicaciones!: Observable<any[]>;
   filteredObrasSociales!: Observable<any[]>;
   filteredPlanes!: Observable<any[]>;
-  filteredFarmacias!: Observable<any[]>;
+  filteredFarmaciasOs!: Observable<any[]>;
 
   form = this.fb.group({
     id: [null as number | null],
@@ -185,86 +217,28 @@ export class BonificacionFormDialogComponent implements OnInit {
     obraSocialInput: [null as any, Validators.required],
     planId: [null as number | null, Validators.required],
     planInput: [null as any, Validators.required],
-    farmaciaId: [null as number | null, Validators.required],
-    farmaciaInput: [null as any, Validators.required],
+    farmaciaOsId: [null as number | null, Validators.required],
+    farmaciaOsInput: [null as any, Validators.required],
     valor1: [0, [Validators.required, Validators.min(0)]],
     valor2: [0, [Validators.required, Validators.min(0)]],
     activo: [true, Validators.required]
   });
 
   ngOnInit() {
-    this.cargarTablasAuxiliares();
-  }
-
-  cargarTablasAuxiliares() {
-    // 1. Cargar Categorías desde Tablas Auxiliares
-    this.categoriasList = [
-      { id: 1, nombre: 'ÉTICO (E)' },
-      { id: 2, nombre: 'GENÉRICO (G)' },
-      { id: 3, nombre: 'HOSPITALARIO (H)' }
-    ];
-
-    // 2. Cargar Ubicaciones desde Tablas Auxiliares
-    this.ubicacionesList = [
-      { id: 1, nombre: 'CENTRO METROPOLITANO' },
-      { id: 2, nombre: 'SUCURSAL CÓRDOBA' },
-      { id: 3, nombre: 'ZONA SANTA FE' }
-    ];
-
-    // 3. Cargar Obras Sociales
-    this.obrasSocialesList = [
-      { id: 1, nombre: 'OSDE ORGANIZACIÓN DE SERVICIOS DIRECTOS EMPRESARIOS' },
-      { id: 2, nombre: 'SWISS MEDICAL S.A.' }
-    ];
-
-    // 4. Cargar Planes
-    this.todosPlanes = [
-      { id: 1, obraSocialId: 1, nombre: 'PLAN 210' },
-      { id: 2, obraSocialId: 1, nombre: 'PLAN 310' },
-      { id: 3, obraSocialId: 2, nombre: 'PLAN SMG20' }
-    ];
-
-    // 5. Cargar Farmacias desde Padrón General de Farmacias
-    this.farmaciasService.getAll().subscribe({
-      next: (res) => {
-        if (res && res.length > 0) {
-          this.todasFarmacias = res.map(x => ({
-            id: x.id!,
-            obraSocialId: x.id === 1 ? 1 : 2,
-            codigo: x.codigo,
-            nombre: x.descripcion,
-            cuit: x.cuit,
-            cuf: x.cuf
-          }));
-        } else {
-          this.todasFarmacias = [
-            { id: 1, obraSocialId: 1, codigo: 'FAR-001', nombre: 'FARMACIA CENTRAL BUENOS AIRES', cuit: '30-71234567-8', cuf: 'CUF-100294' },
-            { id: 2, obraSocialId: 2, codigo: 'FAR-002', nombre: 'FARMACIA DEL SOL', cuit: '30-68994021-4', cuf: 'CUF-300192' }
-          ];
-        }
-        this.completarCargaInicial();
-      },
-      error: () => {
-        this.todasFarmacias = [
-          { id: 1, obraSocialId: 1, codigo: 'FAR-001', nombre: 'FARMACIA CENTRAL BUENOS AIRES', cuit: '30-71234567-8', cuf: 'CUF-100294' },
-          { id: 2, obraSocialId: 2, codigo: 'FAR-002', nombre: 'FARMACIA DEL SOL', cuit: '30-68994021-4', cuf: 'CUF-300192' }
-        ];
-        this.completarCargaInicial();
-      }
-    });
-  }
-
-  completarCargaInicial() {
     this.initFilters();
 
     if (this.data) {
-      this.cargarPlanesYFarmacias(this.data.obraSocialId);
+      this.cargarPlanesYFarmaciasOs(this.data.obraSocialId);
 
       const catObj = this.categoriasList.find(x => x.id === this.data.categoriaId);
       const ubiObj = this.ubicacionesList.find(x => x.id === this.data.ubicacionId);
       const osObj = this.obrasSocialesList.find(x => x.id === this.data.obraSocialId);
       const planObj = this.todosPlanes.find(x => x.id === this.data.planId);
-      const farmObj = this.todasFarmacias.find(x => x.id === this.data.farmaciaId);
+      const farmOsObj = this.todasFarmaciasOs.find(x => x.id === this.data.farmaciaOsId) || {
+        id: this.data.farmaciaOsId,
+        codigoFarmaciaOs: this.data.codigoFarmaciaOs,
+        nombre: this.data.farmaciaNombre
+      };
 
       this.form.patchValue({
         id: this.data.id,
@@ -278,8 +252,8 @@ export class BonificacionFormDialogComponent implements OnInit {
         obraSocialInput: osObj || { nombre: this.data.obraSocialNombre },
         planId: this.data.planId,
         planInput: planObj || { nombre: this.data.planNombre },
-        farmaciaId: this.data.farmaciaId,
-        farmaciaInput: farmObj || { nombre: this.data.farmaciaNombre },
+        farmaciaOsId: this.data.farmaciaOsId,
+        farmaciaOsInput: farmOsObj,
         valor1: this.data.valor1,
         valor2: this.data.valor2,
         activo: this.data.activo
@@ -292,22 +266,56 @@ export class BonificacionFormDialogComponent implements OnInit {
     this.filteredUbicaciones = this.form.get('ubicacionInput')!.valueChanges.pipe(startWith(''), map(v => this._filter(v, this.ubicacionesList)));
     this.filteredObrasSociales = this.form.get('obraSocialInput')!.valueChanges.pipe(startWith(''), map(v => this._filter(v, this.obrasSocialesList)));
     this.filteredPlanes = this.form.get('planInput')!.valueChanges.pipe(startWith(''), map(v => this._filter(v, this.planesFiltrados)));
-    this.filteredFarmacias = this.form.get('farmaciaInput')!.valueChanges.pipe(startWith(''), map(v => this._filter(v, this.farmaciasFiltradas)));
+    this.filteredFarmaciasOs = this.form.get('farmaciaOsInput')!.valueChanges.pipe(startWith(''), map(v => this._filterFarmaciaOs(v, this.farmaciasOsFiltradas)));
   }
 
-  cargarPlanesYFarmacias(obraSocialId: number) {
+  cargarPlanesYFarmaciasOs(obraSocialId: number) {
     this.planesFiltrados = this.todosPlanes.filter(x => x.obraSocialId === obraSocialId);
-    this.farmaciasFiltradas = this.todasFarmacias.filter(x => x.obraSocialId === obraSocialId || !x.obraSocialId);
+    this.farmaciasOsFiltradas = this.todasFarmaciasOs.filter(x => x.obraSocialId === obraSocialId && x.activo);
+
+    const farmaciaCtrl = this.form.get('farmaciaOsInput');
+
+    if (this.farmaciasOsFiltradas.length === 0) {
+      this.sinFarmaciasOs = true;
+      this.farmaciaOsPlaceholder = 'Sin Farmacias OS asociadas';
+      farmaciaCtrl?.disable();
+      this.form.patchValue({ farmaciaOsId: null, farmaciaOsInput: null });
+    } else {
+      this.sinFarmaciasOs = false;
+      this.farmaciaOsPlaceholder = 'Buscar Código OS - Nombre Farmacia...';
+      farmaciaCtrl?.enable();
+    }
+
     this.initFilters();
+  }
+
+  displayFnCategory(item: any): string {
+    return item && item.nombre ? item.nombre : '';
   }
 
   displayFn(item: any): string {
     return item && item.nombre ? item.nombre : '';
   }
 
+  displayFnFarmaciaOs(item: any): string {
+    if (!item) return '';
+    if (item.codigoFarmaciaOs && item.nombre) {
+      return `${item.codigoFarmaciaOs} - ${item.nombre}`;
+    }
+    return item.nombre || '';
+  }
+
   private _filter(val: any, list: any[]) {
     const filterValue = typeof val === 'string' ? val.toLowerCase() : (val?.nombre ? val.nombre.toLowerCase() : '');
-    return list.filter(item => item.nombre.toLowerCase().includes(filterValue) || (item.cuit && item.cuit.includes(filterValue)));
+    return list.filter(item => item.nombre.toLowerCase().includes(filterValue));
+  }
+
+  private _filterFarmaciaOs(val: any, list: any[]) {
+    const filterValue = typeof val === 'string' ? val.toLowerCase() : '';
+    return list.filter(item => 
+      item.nombre.toLowerCase().includes(filterValue) || 
+      item.codigoFarmaciaOs.toLowerCase().includes(filterValue)
+    );
   }
 
   onCategoriaSelected(e: any) { this.form.patchValue({ categoriaId: e.option.value.id }); }
@@ -319,25 +327,25 @@ export class BonificacionFormDialogComponent implements OnInit {
       obraSocialId: osId,
       planId: null,
       planInput: null,
-      farmaciaId: null,
-      farmaciaInput: null
+      farmaciaOsId: null,
+      farmaciaOsInput: null
     });
-    this.cargarPlanesYFarmacias(osId);
+    this.cargarPlanesYFarmaciasOs(osId);
   }
 
   onPlanSelected(e: any) { this.form.patchValue({ planId: e.option.value.id }); }
-  onFarmaciaSelected(e: any) { this.form.patchValue({ farmaciaId: e.option.value.id }); }
+  onFarmaciaOsSelected(e: any) { this.form.patchValue({ farmaciaOsId: e.option.value.id }); }
 
   onSave() {
-    if (this.form.valid) {
+    if (this.form.valid && !this.sinFarmaciasOs) {
       const fVal = this.form.getRawValue();
       const catObj = typeof fVal.categoriaInput === 'object' ? fVal.categoriaInput : this.categoriasList.find(x => x.id === fVal.categoriaId);
       const ubiObj = typeof fVal.ubicacionInput === 'object' ? fVal.ubicacionInput : this.ubicacionesList.find(x => x.id === fVal.ubicacionId);
       const osObj = typeof fVal.obraSocialInput === 'object' ? fVal.obraSocialInput : this.obrasSocialesList.find(x => x.id === fVal.obraSocialId);
       const planObj = typeof fVal.planInput === 'object' ? fVal.planInput : this.todosPlanes.find(x => x.id === fVal.planId);
-      const farmObj = typeof fVal.farmaciaInput === 'object' ? fVal.farmaciaInput : this.todasFarmacias.find(x => x.id === fVal.farmaciaId);
+      const farmOsObj = typeof fVal.farmaciaOsInput === 'object' ? fVal.farmaciaOsInput : this.todasFarmaciasOs.find(x => x.id === fVal.farmaciaOsId);
 
-      const payload = {
+      const payload: BonificacionInterface = {
         ...(fVal.id ? { id: fVal.id } : {}),
         codigo: fVal.codigo || 'BON-003',
         descripcion: fVal.descripcion!.trim().toUpperCase(),
@@ -349,15 +357,15 @@ export class BonificacionFormDialogComponent implements OnInit {
         obraSocialNombre: osObj?.nombre,
         planId: fVal.planId!,
         planNombre: planObj?.nombre,
-        farmaciaId: fVal.farmaciaId!,
-        farmaciaCodigo: farmObj?.codigo,
-        farmaciaNombre: farmObj?.nombre,
+        farmaciaOsId: fVal.farmaciaOsId!,
+        codigoFarmaciaOs: farmOsObj?.codigoFarmaciaOs || '000',
+        farmaciaNombre: farmOsObj?.nombre || '',
         valor1: Number(fVal.valor1),
         valor2: Number(fVal.valor2),
         activo: fVal.activo!
       };
 
-      this.service.save(payload as any).subscribe({
+      this.service.save(payload).subscribe({
         next: (res) => this.ref.close(res),
         error: (err) => alert(err.message)
       });

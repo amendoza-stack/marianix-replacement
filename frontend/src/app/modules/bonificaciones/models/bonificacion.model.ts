@@ -10,9 +10,9 @@ export interface BonificacionInterface {
   planNombre?: string;
   ubicacionId: number;
   ubicacionNombre?: string;
-  farmaciaId: number;
-  farmaciaCodigo?: string;
-  farmaciaNombre?: string;
+  farmaciaOsId: number;
+  codigoFarmaciaOs: string;
+  farmaciaNombre: string;
   valor1: number;
   valor2: number;
   activo: boolean;
@@ -27,7 +27,7 @@ export interface BonificacionFiltroDto {
   obraSocialId?: number;
   planId?: number;
   ubicacionId?: number;
-  farmaciaId?: number;
+  farmaciaOsId?: number;
   activo?: boolean;
 }
 
@@ -36,7 +36,7 @@ export interface BonificacionConsultaRecetaRequestDto {
   obraSocialId: number;
   planId: number;
   ubicacionId: number;
-  farmaciaId: number;
+  farmaciaOsId: number;
 }
 
 export interface BonificacionConsultaRecetaResponseDto {
