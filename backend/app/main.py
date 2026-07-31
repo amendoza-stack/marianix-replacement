@@ -7,6 +7,7 @@ import time
 
 from app.database import engine, Base
 from app.routers import obras_sociales, laboratorios
+from app.services.permisos_seed import sync_permissions_and_roles
 
 logging.basicConfig(
     level=logging.INFO,
@@ -16,17 +17,18 @@ logger = logging.getLogger("marianix_infra")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("🚀 Inicializando Infraestructura Backend y tablas SQLite...")
+    logger.info("🚀 Inicializando Infraestructura Backend, tablas SQLite y Matriz RBAC...")
     try:
         Base.metadata.create_all(bind=engine)
-        logger.info("✅ Tablas de SQLite creadas/verificadas exitosamente.")
+        sync_permissions_and_roles()
+        logger.info("✅ Tablas de SQLite y Matriz de Permisos cargadas exitosamente.")
     except Exception as e:
-        logger.error(f"❌ Error crítico inicializando SQLite: {str(e)}", exc_info=True)
+        logger.error(f"❌ Error durante el arranque del Backend: {str(e)}", exc_info=True)
     yield
     logger.info("🛑 Apagando backend...")
 
 app = FastAPI(
-    title="Marianix API",
+    title="Marianix API Auditoría Médica",
     version="2.4.0",
     openapi_url="/api/v1/openapi.json",
     docs_url="/api/v1/docs",
@@ -44,20 +46,16 @@ app.add_middleware(
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     start_time = time.time()
-    logger.info(f"➡️ Petición: {request.method} {request.url.path}")
     try:
         response = await call_next(request)
-        process_time = (time.time() - start_time) * 1000
-        logger.info(f"⬅️ Respuesta: {request.method} {request.url.path} - {response.status_code} ({process_time:.2f}ms)")
         return response
     except Exception as exc:
-        logger.error(f"❌ Error no capturado en {request.method} {request.url.path}: {str(exc)}", exc_info=True)
+        logger.error(f"❌ Error en {request.method} {request.url.path}: {str(exc)}", exc_info=True)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"detail": "Internal Server Error", "error": str(exc)}
         )
 
-# HEALTH CHECK
 @app.get("/health", tags=["Health"])
 @app.get("/api/v1/health", tags=["Health"])
 def health_check():
@@ -65,3 +63,5 @@ def health_check():
 
 app.include_router(obras_sociales.router)
 app.include_router(laboratorios.router)
+from app.routers import permisos
+app.include_router(permisos.router)
