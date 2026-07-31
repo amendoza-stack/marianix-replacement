@@ -320,7 +320,7 @@ export class BonificacionFormDialogComponent implements OnInit {
   displayFnFarmaciaOs(item: any): string {
     if (!item) return '';
     if (item.codigoFarmaciaOs && item.farmaciaNombrePadron) {
-      return `${item.codigoFarmaciaOs} - ${item.farmaciaNombrePadron}`;
+      return `${item.farmaciaId} - ${item.farmaciaNombrePadron} (OS: ${item.codigoFarmaciaOs})`;
     }
     return item.farmaciaNombrePadron || '';
   }

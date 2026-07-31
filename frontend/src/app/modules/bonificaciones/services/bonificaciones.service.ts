@@ -130,13 +130,10 @@ export class BonificacionesService {
     });
   }
 
-  // EXPORTACIÓN CON ESTRUCTURA EXACTA DE LA IMAGEN OFICIAL: PLAN;UBICA;CATEGO;CODFAROS;VALOR1;VALOR2
   exportarExcel(data: BonificacionInterface[]): void {
-    // ﻿ garantiza codificación UTF-8 correcta en Excel
     let csv = '\uFEFFPLAN;UBICA;CATEGO;CODFAROS;VALOR1;VALOR2\r\n';
     
     data.forEach(row => {
-      // Mapeo del código de categoría a letra corta: 'E', 'G', 'H'
       let categoCode = 'E';
       if (row.categoriaId === 2) categoCode = 'G';
       else if (row.categoriaId === 3) categoCode = 'H';

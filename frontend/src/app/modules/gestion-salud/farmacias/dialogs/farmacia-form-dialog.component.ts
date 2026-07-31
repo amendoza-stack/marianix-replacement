@@ -244,7 +244,7 @@ export class FarmaciaFormDialogComponent implements OnInit {
 
   form = this.fb.group({
     id: [null],
-    codigo: [{ value: 'FAR-003', disabled: true }],
+    codigo: [{ value: '003', disabled: true }],
     descripcion: ['', Validators.required],
     paisId: [1, Validators.required],
     paisInput: [{ id: 1, nombre: 'ARGENTINA' }, Validators.required],
