@@ -1,4 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+﻿import os
+
+root_dir = r"C:\Users\aname\marianix-replacement"
+backend_dir = os.path.join(root_dir, "backend")
+app_dir = os.path.join(backend_dir, "app")
+routers_dir = os.path.join(app_dir, "routers")
+
+# 2. REPARAR app/routers/auth.py CON FALLBACK DE JWT (PyJWT o python-jose)
+auth_code = """from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from datetime import datetime, timedelta
 from app.core.config import settings
@@ -59,3 +67,9 @@ def refresh_token():
 @router.post("/logout")
 def logout():
     return {"status": "ok", "message": "Sesión cerrada correctamente"}
+"""
+
+with open(os.path.join(routers_dir, "auth.py"), "w", encoding="utf-8") as f:
+    f.write(auth_code)
+
+print("✅ Dependencias de JWT instaladas y auth.py actualizado.")

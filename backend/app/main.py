@@ -1,39 +1,12 @@
-from app.routers import auth, exportaciones, importaciones
-import logging
-from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, status
+﻿from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-import time
-
-from app.database import engine, Base
-from app.routers import obras_sociales, laboratorios
-from app.services.permisos_seed import sync_permissions_and_roles
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-)
-logger = logging.getLogger("marianix_infra")
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    logger.info("🚀 Inicializando Infraestructura Backend, tablas SQLite y Matriz RBAC...")
-    try:
-        Base.metadata.create_all(bind=engine)
-        sync_permissions_and_roles()
-        logger.info("✅ Tablas de SQLite y Matriz de Permisos cargadas exitosamente.")
-    except Exception as e:
-        logger.error(f"❌ Error durante el arranque del Backend: {str(e)}", exc_info=True)
-    yield
-    logger.info("🛑 Apagando backend...")
+from app.api.v1.router import api_router
 
 app = FastAPI(
-    title="Marianix API Auditoría Médica",
-    version="2.4.0",
-    openapi_url="/api/v1/openapi.json",
+    title="FarmakD ERP - API REST",
+    version="1.0.0",
     docs_url="/api/v1/docs",
-    lifespan=lifespan
+    openapi_url="/api/v1/openapi.json"
 )
 
 app.add_middleware(
@@ -44,40 +17,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    start_time = time.time()
-    try:
-        response = await call_next(request)
-        return response
-    except Exception as exc:
-        logger.error(f"❌ Error en {request.method} {request.url.path}: {str(exc)}", exc_info=True)
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"detail": "Internal Server Error", "error": str(exc)}
-        )
+# SE MONTA SIN PREFIX PORQUE LOS SUBROUTERS YA CONTIENEN /api/v1/...
+app.include_router(api_router)
 
 @app.get("/health", tags=["Health"])
 @app.get("/api/v1/health", tags=["Health"])
 def health_check():
-    return {"status": "ok", "system": "Marianix Auditoría", "timestamp": time.time()}
-
-app.include_router(obras_sociales.router)
-app.include_router(laboratorios.router)
-from app.routers import permisos
-app.include_router(permisos.router)
-
-from app.routers import configuracion, seguridad, medica, medicamentos, bonificaciones
-
-app.include_router(configuracion.router)
-app.include_router(seguridad.router)
-app.include_router(medica.router)
-app.include_router(medicamentos.router)
-app.include_router(bonificaciones.router)
-
-from app.routers import salud_ext
-app.include_router(salud_ext.router)
-
-app.include_router(auth.router)
-app.include_router(exportaciones.router)
-app.include_router(importaciones.router)
+    return {"status": "ok", "system": "FarmakD ERP API", "version": "1.0.0"}

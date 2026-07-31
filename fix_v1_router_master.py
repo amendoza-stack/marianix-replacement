@@ -1,4 +1,8 @@
-from fastapi import APIRouter
+﻿import os
+
+router_path = r"C:\Users\aname\marianix-replacement\backend\app\api\v1\router.py"
+
+content = """from fastapi import APIRouter
 
 # Importación de endpoints nativos de API v1
 from app.api.v1.endpoints import auth, health
@@ -30,3 +34,9 @@ api_router.include_router(medicamentos.router)
 api_router.include_router(bonificaciones.router)
 api_router.include_router(exportaciones.router)
 api_router.include_router(importaciones.router)
+"""
+
+with open(router_path, "w", encoding="utf-8") as f:
+    f.write(content)
+
+print("✅ backend/app/api/v1/router.py unificado y reescrito con la totalidad de sub-routers.")
