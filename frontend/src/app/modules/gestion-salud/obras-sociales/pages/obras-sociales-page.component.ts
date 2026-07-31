@@ -517,7 +517,8 @@ export class ObrasSocialesPageComponent implements OnInit {
     if (confirm(`¿Confirma dar de baja lógica al plan '${item.descripcion}'?`)) {
       this.service.deletePlan(item.id!).subscribe(() => {
         this.snack.open('Plan dado de baja correctamente', 'Aceptar', { duration: 2500 });
-        this.loadPlanes();
+        this.planesList = this.planesList.filter(x => x.id !== item.id);
+        this.planesDataSource.data = this.planesList.filter(x => x.activo !== false);
       });
     }
   }
@@ -536,7 +537,8 @@ export class ObrasSocialesPageComponent implements OnInit {
     if (confirm(`¿Confirma dar de baja lógica el convenio con '${item.farmaciaRazonSocial}'?`)) {
       this.service.deleteFarmaciaOs(item.id!).subscribe(() => {
         this.snack.open('Convenio dado de baja correctamente', 'Aceptar', { duration: 2500 });
-        this.loadFarmaciasOs();
+        this.farmaciasOsList = this.farmaciasOsList.filter(x => x.id !== item.id);
+        this.farmaciasOsDataSource.data = this.farmaciasOsList.filter(x => x.activo !== false);
       });
     }
   }
@@ -555,7 +557,8 @@ export class ObrasSocialesPageComponent implements OnInit {
     if (confirm(`¿Confirma dar de baja la regla para '${item.monodrogaNombre}'?`)) {
       this.service.deletePlanMonodroga(item.id!).subscribe(() => {
         this.snack.open('Regla dada de baja correctamente', 'Aceptar', { duration: 2500 });
-        this.loadPlanMonodrogas();
+        this.planMonodrogasList = this.planMonodrogasList.filter(x => x.id !== item.id);
+        this.planMonodrogasDataSource.data = this.planMonodrogasList.filter(x => x.activo !== false);
       });
     }
   }
