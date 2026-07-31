@@ -1,0 +1,76 @@
+
+/* ==========================================================================
+   THEME CORPORATIVO - MARIANIX AUDITORÍA MÉDICA
+   ========================================================================== */
+
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+:root {
+  /* Colors */
+  --brand-primary: #003366;       /* Azul Marino */
+  --brand-accent: #0077BE;        /* Azul Cerúleo */
+  --brand-bg-light: #E0F7FA;      /* Fondo Mente / Acento Suave */
+  --brand-surface-light: #FFFFFF;
+  --brand-text-light: #0F172A;
+  --brand-text-secondary: #64748B;
+  --brand-border-light: #E2E8F0;
+
+  /* Status Colors */
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+
+  /* Layout Dimensions */
+  --sidebar-width: 260px;
+  --header-height: 60px;
+
+  /* Typography */
+  --font-family-base: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+   LIGHT MODE (Default)
+   -------------------------------------------------------------------------- */
+body.light-theme, body {
+  background-color: #F4F8FA;
+  color: var(--brand-text-light);
+  font-family: var(--font-family-base);
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  overflow: hidden;
+
+  --bg-app: #F4F8FA;
+  --bg-card: #FFFFFF;
+  --bg-sidebar: #002244; /* Azul Marino Profundo */
+  --text-main: #0F172A;
+  --text-muted: #64748B;
+  --border-color: #E2E8F0;
+}
+
+/* --------------------------------------------------------------------------
+   DARK MODE
+   -------------------------------------------------------------------------- */
+body.dark-theme {
+  background-color: #0B1120;
+  color: #F1F5F9;
+
+  --bg-app: #0B1120;
+  --bg-card: #1E293B;
+  --bg-sidebar: #070D19;
+  --text-main: #F1F5F9;
+  --text-muted: #94A3B8;
+  --border-color: #334155;
+}
+
+/* Utility Classes */
+.bg-primary { background-color: var(--brand-primary) !important; color: white !important; }
+.bg-accent { background-color: var(--brand-accent) !important; color: white !important; }
+.text-primary { color: var(--brand-primary) !important; }
+.text-accent { color: var(--brand-accent) !important; }
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.2); border-radius: 4px; }
+body.dark-theme ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); }

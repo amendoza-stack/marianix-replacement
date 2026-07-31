@@ -1,0 +1,14 @@
+# IDE & Editors
+.vscode/
+.idea/
+*.swp
+*.sublime-project
+
+# OS Generated
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Environment
+.env
+.env.local
