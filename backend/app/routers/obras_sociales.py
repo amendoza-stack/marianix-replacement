@@ -1,3 +1,4 @@
+from app.db_helper import db_get_all, db_get_by_id, db_create, db_update, db_delete
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import Optional, List
@@ -6,36 +7,6 @@ import time
 router = APIRouter(prefix="/api/v1/salud/obras-sociales", tags=["Obras Sociales"])
 
 # Base de datos en memoria / mock con persistencia runtime para evitar fallos SQL
-db_obras_sociales = [
-    {
-        "id": 1,
-        "codigo": "OS-001",
-        "descripcion": "OSDE ORGANIZACIÓN DE SERVICIOS DIRECTOS EMPRESARIOS",
-        "sigla": "OSDE",
-        "cuit": "30-54674125-9",
-        "paisId": 1,
-        "provinciaNombre": "BUENOS AIRES",
-        "localidad": "CABA",
-        "direccion": "AV. CORRIENTES 1234",
-        "telefonos": "011-4321-8800",
-        "mail": "contacto@osde.com.ar",
-        "activo": True
-    },
-    {
-        "id": 2,
-        "codigo": "OS-002",
-        "descripcion": "SWISS MEDICAL S.A.",
-        "sigla": "SWISS MEDICAL",
-        "cuit": "30-68221045-3",
-        "paisId": 1,
-        "provinciaNombre": "BUENOS AIRES",
-        "localidad": "CABA",
-        "direccion": "AV. PUEYRREDON 1441",
-        "telefonos": "0810-333-8888",
-        "mail": "info@swissmedical.com.ar",
-        "activo": True
-    }
-]
 
 class ObraSocialSchema(BaseModel):
     id: Optional[int] = None

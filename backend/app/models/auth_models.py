@@ -15,6 +15,7 @@ class Permiso(Base):
     roles: Mapped[List["RolPermiso"]] = relationship(back_populates="permiso", cascade="all, delete-orphan")
 
 class Rol(Base):
+    permisos_json = Column(Text, nullable=True)
     __tablename__ = "rol"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

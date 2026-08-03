@@ -1,7 +1,7 @@
 export interface ModuloPermiso {
   moduloId: string;
   moduloNombre: string;
-  categoria: 'CONFIGURACION' | 'GESTION_MEDICA' | 'GENERAL';
+  categoria: string;
   lectura: boolean;
   escritura: boolean;
   eliminacion: boolean;
@@ -9,20 +9,17 @@ export interface ModuloPermiso {
 }
 
 export interface RolItem {
-  id: number;
-  codigo: string;
+  id?: number;
+  codigo?: string;
   nombre: string;
   descripcion: string;
-  esSistema: boolean;
-  activo: boolean;
+  esSistema?: boolean;
+  activo?: boolean;
   permisos: ModuloPermiso[];
 }
 
 export const LISTA_MODULOS_DEFAULT: ModuloPermiso[] = [
-  // GENERAL
   { moduloId: 'dash', moduloNombre: 'Dashboard General / KPIs', categoria: 'GENERAL', lectura: true, escritura: true, eliminacion: false, auditoria: true },
-  
-  // CONFIGURACIÓN / ABMs
   { moduloId: 'usr', moduloNombre: 'Usuarios y Accesos', categoria: 'CONFIGURACION', lectura: true, escritura: true, eliminacion: true, auditoria: true },
   { moduloId: 'rol', moduloNombre: 'Roles y Permisos', categoria: 'CONFIGURACION', lectura: true, escritura: true, eliminacion: true, auditoria: true },
   { moduloId: 'paises', moduloNombre: 'Países', categoria: 'CONFIGURACION', lectura: true, escritura: true, eliminacion: false, auditoria: true },
@@ -36,13 +33,13 @@ export const LISTA_MODULOS_DEFAULT: ModuloPermiso[] = [
   { moduloId: 'vinc', moduloNombre: 'Vínculos Familiares', categoria: 'CONFIGURACION', lectura: true, escritura: true, eliminacion: false, auditoria: true },
   { moduloId: 'zona', moduloNombre: 'Zonas Geo-Sanitarias', categoria: 'CONFIGURACION', lectura: true, escritura: true, eliminacion: false, auditoria: true },
   { moduloId: 'cole', moduloNombre: 'Colegios Farmacéuticos', categoria: 'CONFIGURACION', lectura: true, escritura: true, eliminacion: false, auditoria: true },
-
-  // GESTIÓN MÉDICA
   { moduloId: 'afil', moduloNombre: 'Padrón de Afiliados', categoria: 'GESTION_MEDICA', lectura: true, escritura: true, eliminacion: false, auditoria: true },
   { moduloId: 'medi', moduloNombre: 'Padrón de Médicos', categoria: 'GESTION_MEDICA', lectura: true, escritura: true, eliminacion: false, auditoria: true },
   { moduloId: 'os', moduloNombre: 'Obras Sociales y Prepagas', categoria: 'GESTION_MEDICA', lectura: true, escritura: true, eliminacion: false, auditoria: true },
   { moduloId: 'plan', moduloNombre: 'Planes Cobertura', categoria: 'GESTION_MEDICA', lectura: true, escritura: true, eliminacion: false, auditoria: true },
   { moduloId: 'farm', moduloNombre: 'Farmacias Prestadoras', categoria: 'GESTION_MEDICA', lectura: true, escritura: true, eliminacion: false, auditoria: true },
-  { moduloId: 'mono', moduloNombre: 'Plan Monodrogas / Vademécum', categoria: 'GESTION_MEDICA', lectura: true, escritura: true, eliminacion: false, auditoria: true },
-  { moduloId: 'lab', moduloNombre: 'Laboratorios', categoria: 'GESTION_MEDICA', lectura: true, escritura: true, eliminacion: false, auditoria: true }
+  { moduloId: 'vademecum', moduloNombre: 'Plan Monodrogas / Vademécum', categoria: 'GESTION_MEDICA', lectura: true, escritura: true, eliminacion: false, auditoria: true },
+  { moduloId: 'lab', moduloNombre: 'Laboratorios', categoria: 'GESTION_MEDICA', lectura: true, escritura: true, eliminacion: false, auditoria: true },
+  { moduloId: 'med', moduloNombre: 'Medicamentos', categoria: 'MEDICAMENTOS', lectura: true, escritura: true, eliminacion: true, auditoria: true },
+  { moduloId: 'bonif', moduloNombre: 'Bonificaciones', categoria: 'BONIFICACIONES', lectura: true, escritura: true, eliminacion: false, auditoria: true }
 ];

@@ -1,65 +1,82 @@
-<div class="p-6">
-  <div class="flex justify-between items-center mb-6">
+<div class="page-container notranslate" translate="no">
+  
+  <!-- CABECERA PRINCIPAL -->
+  <div class="header-actions">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">Gestión de Usuarios</h1>
-      <p class="text-sm text-gray-500">Administración de usuarios, asignación de roles múltiples y claves de acceso</p>
+      <h1>Gestión de Usuarios</h1>
+      <p class="subtitle">Administración de usuarios, asignación de roles múltiples y claves de acceso</p>
     </div>
-    <button class="bg-blue-900 hover:bg-blue-800 text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2 shadow">
-      + Nuevo Usuario
+    <button mat-flat-button color="primary" class="btn-new" (click)="openForm()">
+      <mat-icon>add</mat-icon> Nuevo Usuario
     </button>
   </div>
 
-  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-    <div class="mb-6">
-      <div class="relative">
-        <input 
-          type="text" 
-          placeholder="Buscar usuario..." 
-          class="w-full pl-4 pr-10 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <span class="absolute right-3 top-3.5 text-gray-400">🔍</span>
-      </div>
-    </div>
+  <!-- TARJETA CON TABLA ANGULAR MATERIAL -->
+  <div class="card-table">
+    
+    <!-- CAMPO DE BÚSQUEDA -->
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar usuario...</mat-label>
+      <input matInput [(ngModel)]="filtroTexto" (keyup)="applyFilter()" placeholder="Buscar por código, nombre o email...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
 
-    <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="text-xs font-bold text-gray-500 border-b border-gray-100 uppercase pb-3">
-            <th class="py-3 px-4">Código</th>
-            <th class="py-3 px-4">Usuario / Nombre</th>
-            <th class="py-3 px-4">Roles Asignados</th>
-            <th class="py-3 px-4 text-center">Estado</th>
-            <th class="py-3 px-4 text-center">Acciones</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100 text-sm">
-          <tr *ngFor="let u of usuarios" class="hover:bg-gray-50/50 transition">
-            <td class="py-4 px-4 font-semibold text-blue-600">{{ u.codigo || ('USR-00' + u.id) }}</td>
-            <td class="py-4 px-4">
-              <div class="font-bold text-gray-900">{{ u.nombre }}</div>
-              <div class="text-xs text-gray-400">{{ u.email }}</div>
-            </td>
-            <td class="py-4 px-4">
-              <span *ngFor="let r of (u.roles || ['SUPERADMIN'])" class="inline-block bg-pink-100 text-pink-700 font-semibold text-xs px-2.5 py-1 rounded-full mr-1">
-                {{ r }}
-              </span>
-            </td>
-            <td class="py-4 px-4 text-center">
-              <span class="bg-emerald-100 text-emerald-700 font-bold text-xs px-3 py-1 rounded-full">
-                {{ u.activo !== false ? 'ACTIVO' : 'INACTIVO' }}
-              </span>
-            </td>
-            <td class="py-4 px-4 text-center space-x-2">
-              <button (click)="eliminarUsuario(u.id!)" class="text-red-500 hover:text-red-700 p-1" title="Eliminar">🗑️</button>
-            </td>
-          </tr>
-          <tr *ngIf="usuarios.length === 0 && !loading">
-            <td colspan="5" class="py-8 text-center text-gray-400">
-              No hay usuarios registrados en el sistema.
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <!-- TABLA MATERIAL -->
+    <table mat-table [dataSource]="dataSource" class="full-width-table">
+      
+      <!-- Columna Código -->
+      <ng-container matColumnDef="codigo">
+        <th mat-header-cell *matHeaderCellDef>Código</th>
+        <td mat-cell *matCellDef="let element" class="font-mono text-blue-600 font-bold">
+          {{ element.codigo || ('USR-00' + element.id) }}
+        </td>
+      </ng-container>
+
+      <!-- Columna Nombre/Usuario -->
+      <ng-container matColumnDef="nombre">
+        <th mat-header-cell *matHeaderCellDef>Usuario / Nombre</th>
+        <td mat-cell *matCellDef="let element">
+          <div class="font-bold text-slate-900">{{ element.nombre || element.nombre_completo }}</div>
+          <div class="text-xs text-slate-400">{{ element.email }} (&#64;{{ element.username }})</div>
+        </td>
+      </ng-container>
+
+      <!-- Columna Roles -->
+      <ng-container matColumnDef="roles">
+        <th mat-header-cell *matHeaderCellDef>Roles Asignados</th>
+        <td mat-cell *matCellDef="let element">
+          <span *ngFor="let r of element.roles" class="inline-block bg-slate-100 text-slate-800 text-xs px-2.5 py-1 rounded-full font-bold mr-1">
+            {{ r }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Columna Estado -->
+      <ng-container matColumnDef="activo">
+        <th mat-header-cell *matHeaderCellDef class="text-center">Estado</th>
+        <td mat-cell *matCellDef="let element" class="text-center">
+          <span [class]="element.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" class="px-2.5 py-1 rounded-full text-xs font-bold">
+            {{ element.activo ? 'Activo' : 'Inactivo' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Columna Acciones -->
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef class="text-center">Acciones</th>
+        <td mat-cell *matCellDef="let element" class="text-center">
+          <button mat-icon-button color="primary" (click)="openForm(element)" title="Editar">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="eliminarUsuario(element.id)" title="Eliminar">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
   </div>
 </div>
