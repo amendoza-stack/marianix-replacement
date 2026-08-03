@@ -1,0 +1,65 @@
+<div class="p-6">
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Gestión de Usuarios</h1>
+      <p class="text-sm text-gray-500">Administración de usuarios, asignación de roles múltiples y claves de acceso</p>
+    </div>
+    <button class="bg-blue-900 hover:bg-blue-800 text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2 shadow">
+      + Nuevo Usuario
+    </button>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <div class="mb-6">
+      <div class="relative">
+        <input 
+          type="text" 
+          placeholder="Buscar usuario..." 
+          class="w-full pl-4 pr-10 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <span class="absolute right-3 top-3.5 text-gray-400">🔍</span>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="text-xs font-bold text-gray-500 border-b border-gray-100 uppercase pb-3">
+            <th class="py-3 px-4">Código</th>
+            <th class="py-3 px-4">Usuario / Nombre</th>
+            <th class="py-3 px-4">Roles Asignados</th>
+            <th class="py-3 px-4 text-center">Estado</th>
+            <th class="py-3 px-4 text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 text-sm">
+          <tr *ngFor="let u of usuarios" class="hover:bg-gray-50/50 transition">
+            <td class="py-4 px-4 font-semibold text-blue-600">{{ u.codigo || ('USR-00' + u.id) }}</td>
+            <td class="py-4 px-4">
+              <div class="font-bold text-gray-900">{{ u.nombre }}</div>
+              <div class="text-xs text-gray-400">{{ u.email }}</div>
+            </td>
+            <td class="py-4 px-4">
+              <span *ngFor="let r of (u.roles || ['SUPERADMIN'])" class="inline-block bg-pink-100 text-pink-700 font-semibold text-xs px-2.5 py-1 rounded-full mr-1">
+                {{ r }}
+              </span>
+            </td>
+            <td class="py-4 px-4 text-center">
+              <span class="bg-emerald-100 text-emerald-700 font-bold text-xs px-3 py-1 rounded-full">
+                {{ u.activo !== false ? 'ACTIVO' : 'INACTIVO' }}
+              </span>
+            </td>
+            <td class="py-4 px-4 text-center space-x-2">
+              <button (click)="eliminarUsuario(u.id!)" class="text-red-500 hover:text-red-700 p-1" title="Eliminar">🗑️</button>
+            </td>
+          </tr>
+          <tr *ngIf="usuarios.length === 0 && !loading">
+            <td colspan="5" class="py-8 text-center text-gray-400">
+              No hay usuarios registrados en el sistema.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

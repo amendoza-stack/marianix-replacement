@@ -1,212 +1,274 @@
-import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { MatTableModule } from '@angular/material/table';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { UsuariosPageFormComponent } from './usuarios-page-form.component';
-import { UserResetPasswordDialogComponent } from './user-reset-password-dialog.component';
-import { UsuarioItem } from './usuario.model';
+import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+
+export interface Usuario {
+  id?: number;
+  codigo?: string;
+  nombre: string;
+  email: string;
+  roles?: string[];
+  activo?: boolean;
+}
 
 @Component({
   selector: 'app-usuarios-page-list',
-  standalone: true,
-  imports: [
-    CommonModule, FormsModule, MatTableModule, MatButtonModule,
-    MatIconModule, MatInputModule, MatFormFieldModule, MatChipsModule, MatDialogModule
-  ],
   template: `
-    <div class="page-container notranslate" translate="no">
-      <div class="header-actions">
+    <div class="p-6">
+      <!-- Header -->
+      <div class="flex justify-between items-center mb-6">
         <div>
-          <h1>Gestión de Usuarios</h1>
-          <p class="subtitle">Administración de usuarios, asignación de roles múltiples y claves de acceso</p>
+          <h1 class="text-2xl font-bold text-gray-900">Gestión de Usuarios</h1>
+          <p class="text-sm text-gray-500">Administración de usuarios, asignación de roles múltiples y claves de acceso</p>
         </div>
-        <button mat-flat-button color="primary" class="btn-new" (click)="openForm()">
-          <mat-icon>person_add</mat-icon> Nuevo Usuario
+        <button 
+          (click)="abrirFormulario()" 
+          class="bg-slate-900 hover:bg-slate-800 text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2 shadow cursor-pointer">
+          + Nuevo Usuario
         </button>
       </div>
 
-      <div class="card-table">
-        <mat-form-field appearance="outline" class="search-field">
-          <mat-label>Buscar usuario...</mat-label>
-          <input matInput [(ngModel)]="searchTerm" (keyup)="applyFilter()" placeholder="Buscar por código, username, email o nombre...">
-          <mat-icon matSuffix>search</mat-icon>
-        </mat-form-field>
+      <!-- Modal / Formulario Flotante de Usuario (Bindings nativos sin ngModel) -->
+      <div *ngIf="mostrarFormulario" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden border border-gray-100">
+          <div class="bg-slate-900 px-6 py-4 flex justify-between items-center text-white">
+            <h3 class="font-bold text-lg">{{ usuarioEditandoId ? 'Editar Usuario' : 'Nuevo Usuario' }}</h3>
+            <button (click)="cerrarFormulario()" class="text-gray-400 hover:text-white font-bold text-xl">&times;</button>
+          </div>
 
-        <table mat-table [dataSource]="filteredItems" class="full-width-table">
-          
-          <ng-container matColumnDef="codigo">
-            <th mat-header-cell *matHeaderCellDef>Código</th>
-            <td mat-cell *matCellDef="let element" class="font-mono text-blue font-bold">{{ element.codigo }}</td>
-          </ng-container>
+          <form (submit)="guardarUsuario($event)" class="p-6 space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nombre Completo</label>
+              <input 
+                type="text" 
+                [value]="formUsuario.nombre"
+                (input)="onInputChange('nombre', $event)"
+                required 
+                placeholder="Ej. Ana Mendoza" 
+                class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+            </div>
 
-          <ng-container matColumnDef="nombreCompleto">
-            <th mat-header-cell *matHeaderCellDef>Usuario / Nombre</th>
-            <td mat-cell *matCellDef="let element">
-              <div class="user-cell">
-                <strong>{{ element.nombreCompleto }}</strong>
-                <span class="user-sub">&#64;{{ element.username }} &bull; {{ element.email }}</span>
-              </div>
-            </td>
-          </ng-container>
+            <div>
+              <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Correo Electrónico</label>
+              <input 
+                type="email" 
+                [value]="formUsuario.email"
+                (input)="onInputChange('email', $event)"
+                required 
+                placeholder="amendoza@farmakd.com" 
+                class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+            </div>
 
-          <ng-container matColumnDef="roles">
-            <th mat-header-cell *matHeaderCellDef>Roles Asignados</th>
-            <td mat-cell *matCellDef="let element">
-              <div class="roles-chips-grid">
-                <span *ngFor="let r of element.roles" class="role-chip" [ngClass]="getRoleClass(r)">
-                  {{ r }}
-                </span>
-              </div>
-            </td>
-          </ng-container>
+            <div *ngIf="!usuarioEditandoId">
+              <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Contraseña</label>
+              <input 
+                type="password" 
+                [value]="formUsuario.password"
+                (input)="onInputChange('password', $event)"
+                placeholder="******" 
+                class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+            </div>
 
-          <ng-container matColumnDef="activo">
-            <th mat-header-cell *matHeaderCellDef>Estado</th>
-            <td mat-cell *matCellDef="let element">
-              <span class="badge" [ngClass]="element.activo ? 'badge-active' : 'badge-inactive'">
-                {{ element.activo ? 'ACTIVO' : 'INACTIVO' }}
-              </span>
-            </td>
-          </ng-container>
+            <div class="flex items-center gap-2 pt-2">
+              <input 
+                type="checkbox" 
+                id="activoCheck" 
+                [checked]="formUsuario.activo"
+                (change)="onCheckboxChange('activo', $event)"
+                class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+              />
+              <label for="activoCheck" class="text-sm font-semibold text-gray-700">Usuario Activo</label>
+            </div>
 
-          <ng-container matColumnDef="acciones">
-            <th mat-header-cell *matHeaderCellDef>Acciones</th>
-            <td mat-cell *matCellDef="let element">
-              <button mat-icon-button color="accent" (click)="openChangePassword(element)" title="Cambiar Contraseña">
-                <mat-icon>lock_reset</mat-icon>
+            <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+              <button 
+                type="button" 
+                (click)="cerrarFormulario()" 
+                class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-50">
+                Cancelar
               </button>
-              <button mat-icon-button color="primary" (click)="openForm(element)" title="Editar Usuario">
-                <mat-icon>edit</mat-icon>
+              <button 
+                type="submit" 
+                class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 shadow">
+                Guardar en BD
               </button>
-              <button mat-icon-button color="warn" (click)="onDelete(element)" title="Eliminar Usuario">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </td>
-          </ng-container>
+            </div>
+          </form>
+        </div>
+      </div>
 
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-        </table>
+      <!-- Tabla de Datos -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div class="mb-6 relative">
+          <input 
+            type="text" 
+            (input)="onSearchChange($event)"
+            placeholder="Buscar usuario..." 
+            class="w-full pl-4 pr-10 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="text-xs font-bold text-gray-500 border-b border-gray-100 uppercase pb-3">
+                <th class="py-3 px-4">Código</th>
+                <th class="py-3 px-4">Usuario / Nombre</th>
+                <th class="py-3 px-4">Roles Asignados</th>
+                <th class="py-3 px-4 text-center">Estado</th>
+                <th class="py-3 px-4 text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 text-sm">
+              <tr *ngFor="let u of usuariosFiltrados" class="hover:bg-gray-50/50 transition">
+                <td class="py-4 px-4 font-semibold text-blue-600">{{ u.codigo || ('USR-00' + u.id) }}</td>
+                <td class="py-4 px-4">
+                  <div class="font-bold text-gray-900">{{ u.nombre }}</div>
+                  <div class="text-xs text-gray-400">{{ u.email }}</div>
+                </td>
+                <td class="py-4 px-4">
+                  <span *ngFor="let r of u.roles" class="inline-block bg-pink-100 text-pink-700 font-semibold text-xs px-2.5 py-1 rounded-full mr-1">
+                    {{ r }}
+                  </span>
+                </td>
+                <td class="py-4 px-4 text-center">
+                  <span [class]="u.activo !== false ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'" class="font-bold text-xs px-3 py-1 rounded-full">
+                    {{ u.activo !== false ? 'ACTIVO' : 'INACTIVO' }}
+                  </span>
+                </td>
+                <td class="py-4 px-4 text-center space-x-2">
+                  <button (click)="editarUsuario(u)" class="text-blue-600 hover:text-blue-800 font-bold p-1 mr-2" title="Editar">
+                    ✏️
+                  </button>
+                  <button (click)="eliminarUsuario(u.id!)" class="text-red-500 hover:text-red-700 font-bold p-1" title="Eliminar">
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="usuariosFiltrados.length === 0">
+                <td colspan="5" class="py-8 text-center text-gray-400">
+                  No hay usuarios registrados en la base de datos de FastAPI.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
-  `,
-  styles: [`
-    .page-container { display: flex; flex-direction: column; gap: 16px; }
-    .header-actions { display: flex; justify-content: space-between; align-items: center; }
-    .header-actions h1 { font-size: 1.5rem; font-weight: 800; color: var(--text-main); margin: 0; }
-    .subtitle { font-size: 0.85rem; color: var(--text-muted); margin: 4px 0 0 0; }
-    .btn-new { height: 44px; border-radius: 8px; font-weight: 700; background-color: var(--brand-primary) !important; }
-    .card-table { background: var(--bg-card); border-radius: 12px; padding: 20px; border: 1px solid var(--border-color); }
-    .search-field { width: 100%; margin-bottom: 12px; }
-    .full-width-table { width: 100%; background: transparent; }
-    .font-mono { font-family: monospace; }
-    .font-bold { font-weight: 700; }
-    .text-blue { color: var(--brand-accent); }
-    .user-cell { display: flex; flex-direction: column; gap: 2px; }
-    .user-sub { font-size: 0.78rem; color: var(--text-muted); }
-    
-    .roles-chips-grid { display: flex; flex-wrap: wrap; gap: 4px; }
-    .role-chip { font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 12px; }
-    .chip-superadmin { background: #FEE2E2; color: #991B1B; }
-    .chip-admin { background: #E0F2FE; color: #075985; }
-    .chip-auditor { background: #F3E8FF; color: #6B21A8; }
-    .chip-operador { background: #FEF3C7; color: #92400E; }
-    .chip-farmaceutico { background: #DCFCE7; color: #166534; }
-
-    .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
-    .badge-active { background: #DCFCE7; color: #15803D; }
-    .badge-inactive { background: #FEE2E2; color: #B91C1C; }
-  `]
+  `
 })
 export class UsuariosPageListComponent implements OnInit {
-  private dialog = inject(MatDialog);
-  private snackBar = inject(MatSnackBar);
-  private cdr = inject(ChangeDetectorRef);
-
-  displayedColumns: string[] = ['codigo', 'nombreCompleto', 'roles', 'activo', 'acciones'];
+  private apiUrl = 'http://127.0.0.1:8000/api/v1/seguridad/usuarios';
   
-  allItems: UsuarioItem[] = [
-    { id: 1, codigo: 'USR-001', nombreCompleto: 'Ana Mendoza', username: 'anamendoza', email: 'amendoza@farmakd.com', roles: ['SUPERADMIN', 'AUDITOR_MEDICO'], activo: true },
-    { id: 2, codigo: 'USR-002', nombreCompleto: 'Carlos Rodríguez', username: 'crodriguez', email: 'crodriguez@marianix.com', roles: ['AUDITOR_MEDICO'], activo: true },
-    { id: 3, codigo: 'USR-003', nombreCompleto: 'María Gómez', username: 'mgomez', email: 'mgomez@marianix.com', roles: ['OPERADOR', 'FARMACEUTICO'], activo: true },
-    { id: 4, codigo: 'USR-004', nombreCompleto: 'Juan Pérez', username: 'jperez', email: 'jperez@marianix.com', roles: ['ADMINISTRADOR'], activo: false }
-  ];
-
-  filteredItems: UsuarioItem[] = [];
+  usuarios: Usuario[] = [];
+  usuariosFiltrados: Usuario[] = [];
+  loading: boolean = false;
   searchTerm: string = '';
 
+  mostrarFormulario: boolean = false;
+  usuarioEditandoId: number | null = null;
+  formUsuario: any = { nombre: '', email: '', password: '', activo: true };
+
+  constructor(private http: HttpClient) {}
+
   ngOnInit(): void {
-    this.filteredItems = [...this.allItems];
+    this.cargarUsuarios();
   }
 
-  applyFilter(): void {
-    const term = this.searchTerm.toLowerCase().trim();
-    if (!term) {
-      this.filteredItems = [...this.allItems];
-    } else {
-      this.filteredItems = this.allItems.filter(item => 
-        item.codigo.toLowerCase().includes(term) ||
-        item.nombreCompleto.toLowerCase().includes(term) ||
-        item.username.toLowerCase().includes(term) ||
-        item.email.toLowerCase().includes(term)
-      );
-    }
-  }
-
-  getRoleClass(role: string): string {
-    switch (role) {
-      case 'SUPERADMIN': return 'chip-superadmin';
-      case 'ADMINISTRADOR': return 'chip-admin';
-      case 'AUDITOR_MEDICO': return 'chip-auditor';
-      case 'OPERADOR': return 'chip-operador';
-      case 'FARMACEUTICO': return 'chip-farmaceutico';
-      default: return 'chip-admin';
-    }
-  }
-
-  openForm(item?: UsuarioItem): void {
-    const dialogRef = this.dialog.open(UsuariosPageFormComponent, {
-      width: '480px',
-      data: { item, totalItems: this.allItems.length }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        if (item) {
-          const idx = this.allItems.findIndex(x => x.id === item.id);
-          if (idx !== -1) this.allItems[idx] = { ...this.allItems[idx], ...result };
-          this.snackBar.open('Usuario actualizado', 'Aceptar', { duration: 2500 });
-        } else {
-          const newUsr: UsuarioItem = { id: Date.now(), ...result };
-          this.allItems = [newUsr, ...this.allItems];
-          this.snackBar.open('Usuario creado exitosamente', 'Aceptar', { duration: 2500 });
-        }
-        this.applyFilter();
-        this.cdr.detectChanges();
+  cargarUsuarios(): void {
+    this.loading = true;
+    this.http.get<Usuario[]>(this.apiUrl).subscribe({
+      next: (data) => {
+        this.usuarios = data || [];
+        this.usuariosFiltrados = [...this.usuarios];
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error al consultar usuarios desde FastAPI:', err);
+        this.usuarios = [];
+        this.usuariosFiltrados = [];
+        this.loading = false;
       }
     });
   }
 
-  openChangePassword(item: UsuarioItem): void {
-    this.dialog.open(UserResetPasswordDialogComponent, {
-      width: '420px',
-      data: item
-    });
+  abrirFormulario(): void {
+    this.usuarioEditandoId = null;
+    this.formUsuario = { nombre: '', email: '', password: '', activo: true };
+    this.mostrarFormulario = true;
   }
 
-  onDelete(item: UsuarioItem): void {
-    if (confirm(`¿Está seguro de eliminar al usuario '${item.username}'?`)) {
-      this.allItems = this.allItems.filter(x => x.id !== item.id);
-      this.applyFilter();
-      this.snackBar.open('Usuario eliminado', 'Aceptar', { duration: 2500 });
-      this.cdr.detectChanges();
+  editarUsuario(usuario: Usuario): void {
+    this.usuarioEditandoId = usuario.id || null;
+    this.formUsuario = { 
+      nombre: usuario.nombre, 
+      email: usuario.email, 
+      activo: usuario.activo !== false 
+    };
+    this.mostrarFormulario = true;
+  }
+
+  cerrarFormulario(): void {
+    this.mostrarFormulario = false;
+  }
+
+  onInputChange(field: string, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.formUsuario[field] = input.value;
+  }
+
+  onCheckboxChange(field: string, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.formUsuario[field] = input.checked;
+  }
+
+  guardarUsuario(event: Event): void {
+    event.preventDefault();
+
+    if (this.usuarioEditandoId) {
+      this.http.put(`${this.apiUrl}/${this.usuarioEditandoId}`, this.formUsuario).subscribe({
+        next: () => {
+          this.cerrarFormulario();
+          this.cargarUsuarios();
+        },
+        error: (err) => console.error('Error al actualizar usuario:', err)
+      });
+    } else {
+      this.http.post(this.apiUrl, this.formUsuario).subscribe({
+        next: () => {
+          this.cerrarFormulario();
+          this.cargarUsuarios();
+        },
+        error: (err) => console.error('Error al crear usuario:', err)
+      });
+    }
+  }
+
+  onSearchChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.searchTerm = input.value.toLowerCase();
+    if (!this.searchTerm) {
+      this.usuariosFiltrados = [...this.usuarios];
+    } else {
+      this.usuariosFiltrados = this.usuarios.filter(u => 
+        u.nombre.toLowerCase().includes(this.searchTerm) || 
+        u.email.toLowerCase().includes(this.searchTerm)
+      );
+    }
+  }
+
+  eliminarUsuario(id: number): void {
+    if (confirm('¿Está seguro de que desea eliminar este usuario de la base de datos?')) {
+      this.http.delete(`${this.apiUrl}/${id}`).subscribe({
+        next: () => {
+          this.cargarUsuarios();
+        },
+        error: (err) => {
+          console.error('Error al eliminar usuario:', err);
+        }
+      });
     }
   }
 }
